@@ -58,7 +58,7 @@ const fetchLeaveData = async () => {
 
     // Fetch data from the Leave Management sheet
     const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbwfGaiHaPhexcE9i-A7q9m81IX6zWqpr4lZBe4AkhlTjVl4wCl0v_ltvBibfduNArBVoA/exec?sheet=Leave Management&action=fetch'
+      'https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=Leave Management&action=fetch'
     );
     
     if (!response.ok) {
@@ -144,7 +144,7 @@ const fetchLeaveData = async () => {
 const fetchGatePassData = async () => {
   try {
     const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbwfGaiHaPhexcE9i-A7q9m81IX6zWqpr4lZBe4AkhlTjVl4wCl0v_ltvBibfduNArBVoA/exec?sheet=Gate Pass&action=fetch'
+      'https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=Gate Pass&action=fetch'
     );
 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -201,7 +201,7 @@ useEffect(() => {
       const userName = currentUser.Name;
 
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbwfGaiHaPhexcE9i-A7q9m81IX6zWqpr4lZBe4AkhlTjVl4wCl0v_ltvBibfduNArBVoA/exec?sheet=JOINING&action=fetch'
+        'https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=JOINING&action=fetch'
       );
       
       if (!response.ok) {
@@ -291,7 +291,7 @@ useEffect(() => {
         // Fetch profile image from ENQUIRY sheet
         try {
           const enquiryResponse = await fetch(
-            'https://script.google.com/macros/s/AKfycbwfGaiHaPhexcE9i-A7q9m81IX6zWqpr4lZBe4AkhlTjVl4wCl0v_ltvBibfduNArBVoA/exec?sheet=ENQUIRY&action=fetch'
+            'https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=ENQUIRY&action=fetch'
           );
           
           if (enquiryResponse.ok) {
@@ -378,7 +378,7 @@ useEffect(() => {
       
       // 1. Fetch current data from JOINING sheet
       const fullDataResponse = await fetch(
-        'https://script.google.com/macros/s/AKfycbwfGaiHaPhexcE9i-A7q9m81IX6zWqpr4lZBe4AkhlTjVl4wCl0v_ltvBibfduNArBVoA/exec?sheet=JOINING&action=fetch'
+        'https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=JOINING&action=fetch'
       );
       
       if (!fullDataResponse.ok) {
@@ -466,7 +466,7 @@ useEffect(() => {
 
       // 8. Send update request
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbwfGaiHaPhexcE9i-A7q9m81IX6zWqpr4lZBe4AkhlTjVl4wCl0v_ltvBibfduNArBVoA/exec",
+        "https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec",
         {
           method: "POST",
           headers: {

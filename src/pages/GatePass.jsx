@@ -32,7 +32,7 @@ const GatePass = () => {
     gatePassImage: null, 
   });
 
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfGaiHaPhexcE9i-A7q9m81IX6zWqpr4lZBe4AkhlTjVl4wCl0v_ltvBibfduNArBVoA/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec";
 
   useEffect(() => {
     fetchGatePassData();
@@ -218,7 +218,7 @@ const uploadImageToDrive = async (file) => {
         base64Data: base64Data,
         fileName: file.name,
         mimeType: file.type,
-        folderId: '1AWeKCYD_hy_9pxT17zoLp-tNgSla9gBi'
+        folderId: '1kh-OGIo_WgYaDRbfVlM_oohs13nYLiht'
       })
     });
     
