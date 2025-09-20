@@ -213,7 +213,7 @@ const [shareFormData, setShareFormData] = useState({
 const handleShareClick = (item) => {
   setSelectedItem(item);
   // Create the share link with enquiry number
-  const shareLink = `https://hr-joining-form.vercel.app/?enquiry=${item.candidateEnquiryNo || ''}`;
+  const shareLink = `hr-fms-joining-form.vercel.app?enquiry=${item.candidateEnquiryNo || ''}`;
   
   setShareFormData({
     recipientName: item.candidateName || '', // Auto-fill from Column E
@@ -1469,7 +1469,7 @@ const handleJoiningSubmit = async (e) => {
   <div className="text-sm text-gray-600 space-y-1">
     <div className="flex items-center">
       <a 
-        href="https://hr-joining-form.vercel.app/" 
+        href="hr-fms-joining-form.vercel.app" 
         target="_blank" 
         rel="noopener noreferrer"
         className="text-indigo-600 hover:text-indigo-800"
