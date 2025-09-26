@@ -12,7 +12,7 @@ const MisReport = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=MIS&action=fetch');
+      const response = await fetch('https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=MIS&action=fetch');
       
       if (!response.ok) {
         throw new Error('Failed to fetch data');

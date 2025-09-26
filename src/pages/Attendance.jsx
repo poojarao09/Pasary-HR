@@ -21,7 +21,7 @@ const Attendance = () => {
 
     try {
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=Report&action=fetch'
+        'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=Report&action=fetch'
       );
 
       if (!response.ok) {
@@ -114,7 +114,7 @@ const getIndex = (headerName) => {
       
     try {
       const response = await fetch(
-        `https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=Report Daily&action=fetch`
+        `https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=Report Daily&action=fetch`
       );
 
       if (!response.ok) {

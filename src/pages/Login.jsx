@@ -6,8 +6,8 @@ import useAuthStore from '../store/authStore';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUsers } from "@fortawesome/free-solid-svg-icons";
 
-const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=USER&action=fetch';
-const LEAVING_API_URL = 'https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=LEAVING&action=fetch';
+const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=USER&action=fetch';
+const LEAVING_API_URL = 'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=LEAVING&action=fetch';
 
 localStorage.removeItem('hasSeenLanguageHint');
 

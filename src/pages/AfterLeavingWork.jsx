@@ -28,7 +28,7 @@ const AfterLeavingWork = () => {
 
     try {
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=LEAVING&action=fetch'
+        'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=LEAVING&action=fetch'
       );
       
       if (!response.ok) {
@@ -107,7 +107,7 @@ const AfterLeavingWork = () => {
 
     try {
       const fullDataResponse = await fetch(
-        'https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=LEAVING&action=fetch'
+        'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=LEAVING&action=fetch'
       );
       
       if (!fullDataResponse.ok) {
@@ -217,7 +217,7 @@ const handleSubmit = async (e) => {
   try {
     // 1. First fetch the current data
     const fullDataResponse = await fetch(
-      'https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec?sheet=LEAVING&action=fetch'
+      'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=LEAVING&action=fetch'
     );
     if (!fullDataResponse.ok) {
       throw new Error(`HTTP error! status: ${fullDataResponse.status}`);
@@ -268,7 +268,7 @@ const handleSubmit = async (e) => {
     if (allConditionsMet) {
       updatePromises.push(
         fetch(
-          "https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec",
+          "https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec",
           {
             method: "POST",
             headers: {
@@ -290,7 +290,7 @@ const handleSubmit = async (e) => {
     if (formData.finalReleaseDate) {
       updatePromises.push(
         fetch(
-          "https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec",
+          "https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec",
           {
             method: "POST",
             headers: {
@@ -321,7 +321,7 @@ const handleSubmit = async (e) => {
     fields.forEach((field) => {
       updatePromises.push(
         fetch(
-          "https://script.google.com/macros/s/AKfycbzRgc-d2fMLO0awuj8zJJExOawcWRVD0wdeO0pD8fgDdA7GiTBf-i1UQJ8yhXXgMVX4FA/exec",
+          "https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec",
           {
             method: "POST",
             headers: {
