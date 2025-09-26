@@ -218,7 +218,7 @@ const uploadImageToDrive = async (file) => {
         base64Data: base64Data,
         fileName: file.name,
         mimeType: file.type,
-        folderId: '1kh-OGIo_WgYaDRbfVlM_oohs13nYLiht'
+        folderId: '1o1DT_eydNgeRvLaFM9o-g96kPbEJb5Bf'
       })
     });
     

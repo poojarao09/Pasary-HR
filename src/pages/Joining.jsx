@@ -213,7 +213,7 @@ const [shareFormData, setShareFormData] = useState({
 const handleShareClick = (item) => {
   setSelectedItem(item);
   // Create the share link with enquiry number
-  const shareLink = `hr-fms-joining-form.vercel.app?enquiry=${item.candidateEnquiryNo || ''}`;
+  const shareLink = `https://hr-fms-passary-joining-form.vercel.app/?enquiry=${item.candidateEnquiryNo || ''}`;
   
   setShareFormData({
     recipientName: item.candidateName || '', // Auto-fill from Column E
@@ -620,7 +620,7 @@ const formatDateForStorage = (dateString) => {
     }
   };
 
-  const uploadFileToDrive = async (file, folderId = '1kh-OGIo_WgYaDRbfVlM_oohs13nYLiht') => {
+  const uploadFileToDrive = async (file, folderId = '19SEjZdQMyE3Rz8EbFeBbudqbmD3DA0A9') => {
     try {
       const reader = new FileReader();
       const base64Data = await new Promise((resolve, reject) => {
@@ -1469,7 +1469,7 @@ const handleJoiningSubmit = async (e) => {
   <div className="text-sm text-gray-600 space-y-1">
     <div className="flex items-center">
       <a 
-        href="hr-fms-joining-form.vercel.app" 
+        href="https://hr-fms-passary-joining-form.vercel.app/" 
         target="_blank" 
         rel="noopener noreferrer"
         className="text-indigo-600 hover:text-indigo-800"

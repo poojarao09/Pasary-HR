@@ -36,7 +36,7 @@ const [formData, setFormData] = useState({
 });
 
   // Google Drive folder ID for file uploads
-  const GOOGLE_DRIVE_FOLDER_ID = '1kh-OGIo_WgYaDRbfVlM_oohs13nYLiht';
+  const GOOGLE_DRIVE_FOLDER_ID = '1UFhQ2mFlpf0Ql0ohtdlrotxplaQv8crF';
 
   // Fetch all necessary data
 const fetchAllData = async () => {
