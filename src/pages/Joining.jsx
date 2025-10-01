@@ -241,7 +241,7 @@ const handleShareSubmit = async (e) => {
       imageUrl: selectedItem.candidatePhoto || ''
     }];
     
-    const URL = 'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec';
+    const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
     
     const params = new URLSearchParams();
     params.append('action', 'shareViaEmail');
@@ -294,10 +294,10 @@ const fetchJoiningData = async () => {
   try {
     const [enquiryResponse, followUpResponse] = await Promise.all([
       fetch(
-        "https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=ENQUIRY&action=fetch"
+        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=ENQUIRY&action=fetch"
       ),
       fetch(
-        "https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=Follow - Up&action=fetch"
+        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Follow - Up&action=fetch"
       ),
     ]);
 
@@ -575,7 +575,7 @@ const formatDateForStorage = (dateString) => {
   };
 
   const postToJoiningSheet = async (rowData) => {
-    const URL = 'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec';
+    const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
 
     try {
       console.log('Attempting to post:', {
@@ -637,7 +637,7 @@ const formatDateForStorage = (dateString) => {
       params.append('folderId', folderId);
 
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec',
+        'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec',
         {
           method: 'POST',
           headers: {
@@ -666,7 +666,7 @@ const formatDateForStorage = (dateString) => {
   };
 
 const updateEnquirySheet = async (enquiryNo, timestamp) => {
-  const URL = 'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec';
+  const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
 
   try {
     const params = new URLSearchParams();

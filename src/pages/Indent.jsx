@@ -9,6 +9,7 @@ const Indent = () => {
   const [formData, setFormData] = useState({
     post: '',
     gender: '',
+    company: '',
     department:'',
     prefer: '',
     numberOfPost: '',
@@ -25,13 +26,13 @@ const Indent = () => {
   const [submitting, setSubmitting] = useState(false);
 
   // Social site options
-  const socialSiteOptions = [
-    'Instagram',
-    'Facebook',
-    'LinkedIn',
-    'Referral',
-    'Job Consultancy',
-  ];
+  // const socialSiteOptions = [
+  //   'Instagram',
+  //   'Facebook',
+  //   'LinkedIn',
+  //   'Referral',
+  //   'Job Consultancy',
+  // ];
 
   useEffect(() => {
     const loadData = async () => {
@@ -75,10 +76,10 @@ const getCurrentTimestamp = () => {
   return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 };
 
-  const fetchIndentDataFromRow7 = async () => {
+ const fetchIndentDataFromRow7 = async () => {
   try {
     const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=INDENT&action=fetch'
+      'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=INDENT&action=fetch'
     );
     
     const result = await response.json();
@@ -96,12 +97,16 @@ const getCurrentTimestamp = () => {
       const postIndex = headers.indexOf('Post');
       const genderIndex = headers.indexOf('Gender');
       const departmentIndex = headers.indexOf('Department');
-       const preferIndex = headers.indexOf('Prefer');
-         const noOFPostIndex = headers.indexOf('Number Of Posts');
-         const completionDateIndex = headers.indexOf('Completion Date');
-         const socialSiteIndex = headers.indexOf('Social Site');
-         const experienceIndex = headers.indexOf('Experience')
-         const socialSiteTypesIndex = headers.indexOf('Social Site Types')
+      const preferIndex = headers.indexOf('Prefer');
+      
+      // Direct column indices (0-based)
+      const noOFPostIndex = 6; // Column G (Number Of Posts)
+      const completionDateIndex = 7; // Column H (Completion Date)  
+      const experienceIndex = 9; // Column J (Experience)
+      
+      // Find other indices by header name
+      const socialSiteIndex = headers.indexOf('Social Site');
+      
       // Add other column indices as needed
       
       // Process the data
@@ -111,15 +116,16 @@ const getCurrentTimestamp = () => {
         post: row[postIndex],
         gender: row[genderIndex],
         department: row[departmentIndex],
-        prefer:row[preferIndex],
-        noOfPost:row[noOFPostIndex],
-        completionDate:row[completionDateIndex],
-        socialSite:row[socialSiteIndex],
-        experience:row[experienceIndex],
-        socialSiteTypes:row[socialSiteTypesIndex],
+        prefer: row[preferIndex],
+        noOfPost: row[noOFPostIndex], // Column G
+        completionDate: row[completionDateIndex], // Column H
+        socialSite: row[socialSiteIndex],
+        experience: row[experienceIndex], // Column J
         // Add other fields as needed
       }));
-      setIndentData(processedData)
+      
+      setIndentData(processedData);
+      
       return {
         success: true,
         data: processedData,
@@ -143,7 +149,7 @@ const getCurrentTimestamp = () => {
 const fetchLastIndentNumber = async () => {
   try {
     const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=INDENT&action=fetch'
+      'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=INDENT&action=fetch'
     );
     
     const result = await response.json();
@@ -265,9 +271,11 @@ const fetchLastIndentNumber = async () => {
     if (
       !formData.post ||
       !formData.gender ||
+      !formData.company ||
+
       !formData.numberOfPost ||
-      !formData.competitionDate ||
-      !formData.socialSite
+      !formData.competitionDate 
+      // !formData.socialSite
     ) {
       toast.error('Please fill all required fields');
       return;
@@ -280,10 +288,10 @@ const fetchLastIndentNumber = async () => {
     }
 
     // Additional validation for social site types if socialSite is "Yes"
-    if (formData.socialSite === 'Yes' && formData.socialSiteTypes.length === 0) {
-      toast.error('Please select at least one social site type');
-      return;
-    }
+    // if (formData.socialSite === 'Yes' && formData.socialSiteTypes.length === 0) {
+    //   toast.error('Please select at least one social site type');
+    //   return;
+    // }
 
     try {
       setSubmitting(true);
@@ -299,25 +307,33 @@ const fetchLastIndentNumber = async () => {
       const rowData = [
         timestamp,
         indentNumber,
+        formData.company,
+
         formData.post,
         formData.gender,
         formData.prefer,
         formData.numberOfPost,
         formattedDate,
-        formData.socialSite,
+        formData.department,
+        formData.prefer === 'Experience' ? formData.experience : "",
+        // formattedDate,
         "NeedMore",
+        // formData.socialSite,
+        // "NeedMore",
         "", // Column J (empty)
         "", // Column K (empty)
         "", // Column L (empty)
         "", // Column M (empty)
         "", // Column N (empty)
         "", // Column O (empty)
-        formData.prefer === 'Experience' ? formData.experience : "", // Column P - Experience
-        formData.socialSite === 'Yes' ? formData.socialSiteTypes.join(', ') : "", // Column Q - Social Site Types
-        formData.department,
+        // formData.prefer === 'Experience' ? formData.experience : "",
+         // Column P - Experience
+        // formData.socialSite === 'Yes' ? formData.socialSiteTypes.join(', ') : "",
+         // Column Q - Social Site Types
+        // formData.department,
       ];
 
-      const response = await fetch('https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec', {
+      const response = await fetch('https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec', {
         method: 'POST',
         body: new URLSearchParams({
           sheetName: 'INDENT',
@@ -332,6 +348,8 @@ const fetchLastIndentNumber = async () => {
         toast.success('Indent submitted successfully!');
         setFormData({
           post: '',
+          company: '',
+
           gender: '',
           department:'',
           prefer: '',
@@ -459,6 +477,21 @@ const fetchLastIndentNumber = async () => {
                 />
               </div>
 
+                <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Company (कंपनी) <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="company"
+              value={formData.company}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter company name"
+              required
+            />
+          </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Gender (लिंग) *
@@ -558,7 +591,7 @@ const fetchLastIndentNumber = async () => {
                   required
                 />
               </div>
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Social Site (सोशल साइट) *
                 </label>
@@ -573,10 +606,10 @@ const fetchLastIndentNumber = async () => {
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
                 </select>
-              </div>
+              </div> */}
 
               {/* Social Site Types checklist - only show when socialSite is Yes */}
-              {formData.socialSite === "Yes" && (
+              {/* {formData.socialSite === "Yes" && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Social Site Types (सोशल साइट प्रकार) *
@@ -602,7 +635,7 @@ const fetchLastIndentNumber = async () => {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
 
               <div className="flex justify-end space-x-2 pt-4">
                 <button
@@ -690,12 +723,12 @@ const fetchLastIndentNumber = async () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Completion Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Social Site
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Social Site Types
-                  </th>
+                  </th> */}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
@@ -781,12 +814,12 @@ const fetchLastIndentNumber = async () => {
                             : "—"}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.socialSite}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.socialSiteTypes}
-                      </td>
+                      </td> */}
                     </tr>
                   ))
                 )}

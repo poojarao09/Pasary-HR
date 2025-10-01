@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Indent from './pages/Indent';
 import SocialSite from './pages/SocialSite';
+import SocialSitePage from './components/SocialSitePage';
 import FindEnquiry from './pages/FindEnquiry';
 import CallTracker from './pages/CallTracker';
 import AfterJoiningWork from './pages/AfterJoiningWork';
@@ -43,7 +44,8 @@ function App() {
           }>
             <Route index element={<Dashboard />} />
             <Route path="indent" element={<Indent />} />
-            {/* <Route path="social-site" element={<SocialSite />} /> */}
+            <Route path="social-site" element={<SocialSite />} />
+            <Route path="/social-site" element={<SocialSitePage />} />
             <Route path="find-enquiry" element={<FindEnquiry />} />
             <Route path="call-tracker" element={<CallTracker />} />
             <Route path='joining' element={<Joining />} />

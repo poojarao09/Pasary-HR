@@ -32,7 +32,7 @@ const LeaveRequest = () => {
   const fetchHodNames = async () => {
     try {
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=Master&action=fetch'
+        'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Master&action=fetch'
       );
       
       if (!response.ok) {
@@ -65,7 +65,7 @@ const LeaveRequest = () => {
   const fetchEmployeeData = async () => {
     try {
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=JOINING&action=fetch'
+        'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=JOINING&action=fetch'
       );
       
       if (!response.ok) {
@@ -111,7 +111,7 @@ const LeaveRequest = () => {
   const fetchEmployees = async () => {
     try {
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=JOINING&action=fetch'
+        'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=JOINING&action=fetch'
       );
       
       if (!response.ok) {
@@ -289,7 +289,7 @@ const fetchLeaveData = async () => {
 
   try {
     const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=Leave Management&action=fetch'
+      'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Leave Management&action=fetch'
     );
     
     if (!response.ok) {
@@ -390,7 +390,7 @@ const formattedTimestamp = `${day}/${month}/${year} ${hours}:${minutes}:${second
       formData.designation,        // Designation
     ];
 
-    const response = await fetch('https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec', {
+    const response = await fetch('https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec', {
       method: 'POST',
       body: new URLSearchParams({
         sheetName: 'Leave Management',

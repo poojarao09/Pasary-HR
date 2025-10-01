@@ -34,7 +34,7 @@ const LeaveManagement = () => {
     const fetchHodNames = async () => {
     try {
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=Master&action=fetch'
+        'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Master&action=fetch'
       );
       
       if (!response.ok) {
@@ -103,7 +103,7 @@ const LeaveManagement = () => {
 const fetchEmployees = async () => {
     try {
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=JOINING&action=fetch'
+        'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=JOINING&action=fetch'
       );
       
       if (!response.ok) {
@@ -246,7 +246,7 @@ const handleSubmit = async (e) => {
       formData.designation         // Designation (Column K, index 10)
     ];
 
-    const response = await fetch('https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec', {
+    const response = await fetch('https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec', {
       method: 'POST',
       body: new URLSearchParams({
         sheetName: 'Leave Management',
@@ -294,7 +294,7 @@ const handleLeaveAction = async (action) => {
   
   try {
     const fullDataResponse = await fetch(
-      'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=Leave Management&action=fetch'
+      'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Leave Management&action=fetch'
     );
     
     if (!fullDataResponse.ok) {
@@ -344,7 +344,7 @@ const handleLeaveAction = async (action) => {
     };
 
     const response = await fetch(
-      "https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec",
+      "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec",
       {
         method: "POST",
         headers: {
@@ -380,7 +380,7 @@ const handleLeaveAction = async (action) => {
 
     try {
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=Leave Management&action=fetch'
+        'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Leave Management&action=fetch'
       );
       
       if (!response.ok) {

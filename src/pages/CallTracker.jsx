@@ -27,24 +27,26 @@ const fetchEnquiryData = async () => {
   setError(null);
 
   try {
-    const [enquiryResponse, followUpResponse] = await Promise.all([
+    const [enquiryResponse, followUpResponse, indentResponse] = await Promise.all([
       fetch(
-        "https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=ENQUIRY&action=fetch"
+        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=ENQUIRY&action=fetch"
       ),
       fetch(
-        "https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=Follow - Up&action=fetch"
+        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Follow - Up&action=fetch"
+      ),
+      fetch(
+        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=INDENT&action=fetch"
       ),
     ]);
 
-    if (!enquiryResponse.ok || !followUpResponse.ok) {
-      throw new Error(
-        `HTTP error! status: ${enquiryResponse.status} or ${followUpResponse.status}`
-      );
+    if (!enquiryResponse.ok || !followUpResponse.ok || !indentResponse.ok) {
+      throw new Error(`HTTP error!`);
     }
 
-    const [enquiryResult, followUpResult] = await Promise.all([
+    const [enquiryResult, followUpResult, indentResult] = await Promise.all([
       enquiryResponse.json(),
       followUpResponse.json(),
+      indentResponse.json(),
     ]);
 
     if (
@@ -55,6 +57,23 @@ const fetchEnquiryData = async () => {
       throw new Error(
         enquiryResult.error || "Not enough rows in enquiry sheet data"
       );
+    }
+
+    // Process INDENT data to create a lookup map
+    let indentDepartmentMap = {};
+    if (indentResult.success && indentResult.data && indentResult.data.length >= 7) {
+      const indentHeaders = indentResult.data[5].map(h => h.trim());
+      const indentDataRows = indentResult.data.slice(6);
+      
+      const getIndentIndex = (headerName) => indentHeaders.findIndex(h => h === headerName);
+      
+      indentDataRows.forEach(row => {
+        const indentNo = row[getIndentIndex('Indent Number')];
+        const department = row[8]; // Column I (index 8)
+        if (indentNo) {
+          indentDepartmentMap[indentNo] = department || '';
+        }
+      });
     }
 
     // Process enquiry data
@@ -72,35 +91,40 @@ const fetchEnquiryData = async () => {
         const actual = row[actualIndex];
         return planned && (!actual || actual === "");
       })
-      .map((row) => ({
-        id: row[getIndex("Timestamp")],
-        indentNo: row[getIndex("Indent Number")],
-        candidateEnquiryNo: row[getIndex("Candidate Enquiry Number")],
-        applyingForPost: row[getIndex("Applying For the Post")],
-        department: row[getIndex("Department")],
-        candidateName: row[getIndex("Candidate Name")],
-        candidateDOB: row[getIndex("DOB")], // Fetch DOB from Column F (index 5)
-        candidatePhone: row[getIndex("Candidate Phone Number")],
-        candidateEmail: row[getIndex("Candidate Email")],
-        previousCompany: row[getIndex("Previous Company Name")],
-        jobExperience: row[getIndex("Job Experience")] || "",
-        lastSalary: row[getIndex("Last Salary Drawn")] || "",
-        previousPosition: row[getIndex("Previous Position")] || "",
-        reasonForLeaving:
-          row[getIndex("Reason Of Leaving Previous Company")] || "",
-        maritalStatus: row[getIndex("Marital Status")] || "",
-        lastEmployerMobile: row[getIndex("Last Employer Mobile Number")] || "",
-        candidatePhoto: row[getIndex("Candidate Photo")] || "",
-        candidateResume: row[19] || "",
-        referenceBy: row[getIndex("Reference By")] || "",
-        presentAddress: row[getIndex("Present Address")] || "",
-        aadharNo: row[getIndex("Aadhar Number")] || "",
-        designation: row[getIndex("Applying For the Post")] || "", // Fetch Designation from Column D (index 3)
-      }));
+      .map((row) => {
+        const indentNo = row[getIndex("Indent Number")];
+        const departmentFromIndent = indentDepartmentMap[indentNo] || '';
+        
+        return {
+          id: row[getIndex("Timestamp")],
+          indentNo: indentNo,
+          candidateEnquiryNo: row[getIndex("Candidate Enquiry Number")],
+          applyingForPost: row[getIndex("Applying For the Post")],
+          department: departmentFromIndent, // INDENT sheet se fetch kiya
+          candidateName: row[getIndex("Candidate Name")],
+          candidateDOB: row[getIndex("DOB")],
+          candidatePhone: row[getIndex("Candidate Phone Number")],
+          candidateEmail: row[getIndex("Candidate Email")],
+          previousCompany: row[getIndex("Previous Company Name")],
+          jobExperience: row[getIndex("Job Experience")] || "",
+          lastSalary: row[getIndex("Last Salary Drawn")] || "",
+          previousPosition: row[getIndex("Previous Position")] || "",
+          reasonForLeaving:
+            row[getIndex("Reason Of Leaving Previous Company")] || "",
+          maritalStatus: row[getIndex("Marital Status")] || "",
+          lastEmployerMobile: row[getIndex("Last Employer Mobile Number")] || "",
+          candidatePhoto: row[getIndex("Candidate Photo")] || "",
+          candidateResume: row[19] || "",
+          referenceBy: row[getIndex("Reference By")] || "",
+          presentAddress: row[getIndex("Present Address")] || "",
+          aadharNo: row[getIndex("Aadhar Number")] || "",
+          designation: row[getIndex("Applying For the Post")] || "",
+        };
+      });
 
     setEnquiryData(processedEnquiryData);
 
-    // Process follow-up data for filtering
+    // Process follow-up data
     if (followUpResult.success && followUpResult.data) {
       const rawFollowUpData = followUpResult.data || followUpResult;
       const followUpRows = Array.isArray(rawFollowUpData[0])
@@ -108,8 +132,8 @@ const fetchEnquiryData = async () => {
         : rawFollowUpData;
 
       const processedFollowUpData = followUpRows.map((row) => ({
-        enquiryNo: row[1] || "", // Column B (index 1) - Enquiry No
-        status: row[2] || "", // Column C (index 2) - Status
+        enquiryNo: row[1] || "",
+        status: row[2] || "",
       }));
 
       setFollowUpData(processedFollowUpData);
@@ -131,7 +155,7 @@ const fetchFollowUpData = async () => {
 
   try {
     const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec?sheet=Follow - Up&action=fetch'
+      'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Follow - Up&action=fetch'
     );
 
     if (!response.ok) {
@@ -209,7 +233,7 @@ const fetchFollowUpData = async () => {
 
 
 const postToSheet = async (rowData) => {
-  const URL = 'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec';
+  const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
 
   try {
     console.log('Attempting to post:', {
@@ -255,7 +279,7 @@ const postToSheet = async (rowData) => {
 };
 
 const updateEnquirySheet = async (enquiryNo) => {
-  const URL = 'https://script.google.com/macros/s/AKfycbyi6Oco3v-cuUEtO8_9mKjm5cEJACRbqx_GgiiXqRNyRd5kErySOsC5JrB1JJdaNosM/exec';
+  const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
 
   try {
     console.log('Attempting to update ENQUIRY sheet for:', enquiryNo);
