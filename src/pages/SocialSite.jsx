@@ -528,7 +528,7 @@ const SocialSite = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Indent Number (इंडेंट नंबर)
+                      Indent Number
                     </label>
                     <input
                       type="text"
@@ -540,7 +540,7 @@ const SocialSite = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Social Site (सोशल साइट) *
+                      Social Site*
                     </label>
                     <select
                       name="socialSite"
@@ -559,7 +559,7 @@ const SocialSite = () => {
                   {formData.socialSite === "Yes" && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Social Site Types (सोशल साइट प्रकार) *
+                        Social Site Types*
                       </label>
                       <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2">
                         {socialSiteOptions.map((option) => (

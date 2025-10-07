@@ -153,76 +153,57 @@ const fetchLastIndentNumber = async () => {
     );
     
     const result = await response.json();
-    console.log('Full sheet data:', result); // Debugging
+    console.log('Full sheet data:', result);
     
-    if (result.success && result.data && result.data.length > 1) {
-      // Find the first row with actual headers (skip empty rows)
-      let headerRowIndex = 0;
-      while (headerRowIndex < result.data.length && 
-             result.data[headerRowIndex].every(cell => !cell || cell.trim() === '')) {
-        headerRowIndex++;
-      }
-      
-      if (headerRowIndex >= result.data.length) {
-        throw new Error('No header row found in sheet');
-      }
-      
-      const headers = result.data[headerRowIndex].map(h => h ? h.trim().toLowerCase() : '');
+    if (result.success && result.data && result.data.length > 6) {
+      // Headers are at row 6 (index 5)
+      const headers = result.data[5].map(h => h ? h.trim().toLowerCase() : '');
       console.log('Headers found:', headers);
       
-      // Try to find the indent number column by common names
-      const possibleNames = ['indent number', 'indentnumber', 'indent_no', 'indentno', 'indent'];
-      let indentNumberIndex = -1;
-      
-      for (const name of possibleNames) {
-        indentNumberIndex = headers.indexOf(name);
-        if (indentNumberIndex !== -1) break;
-      }
-      
+      // Find indent number column index
+      let indentNumberIndex = headers.indexOf('indent number');
       if (indentNumberIndex === -1) {
-        // If still not found, try to find by position (from your screenshot it's column B/index 1)
-        indentNumberIndex = 1;
-        console.warn('Using fallback column index 1 for indent number');
+        indentNumberIndex = 1; // Fallback to column B
       }
       
-      // Find the last non-empty row with data
-      let lastDataRowIndex = result.data.length - 1;
-      while (lastDataRowIndex > headerRowIndex && 
-             (!result.data[lastDataRowIndex][indentNumberIndex] || 
-              result.data[lastDataRowIndex][indentNumberIndex].trim() === '')) {
-        lastDataRowIndex--;
+      console.log('Indent number column index:', indentNumberIndex);
+      
+      // Data starts from row 7 (index 6)
+      // Find the last non-empty indent number from data rows
+      let lastIndentNumber = null;
+      let maxNumericValue = 0;
+      
+      // Start from row 7 (index 6) and go till end
+      for (let i = 6; i < result.data.length; i++) {
+        const indentValue = result.data[i][indentNumberIndex];
+        
+        if (indentValue && indentValue.toString().trim() !== '') {
+          lastIndentNumber = indentValue;
+          
+          // Extract numeric part
+          const match = indentValue.toString().match(/\d+/);
+          if (match) {
+            const numericValue = parseInt(match[0]);
+            if (numericValue > maxNumericValue) {
+              maxNumericValue = numericValue;
+            }
+          }
+        }
       }
       
-      if (lastDataRowIndex <= headerRowIndex) {
-        return {
-          success: true,
-          lastIndentNumber: 0,
-          message: 'No data rows found'
-        };
-      }
-      
-      const lastIndentNumber = result.data[lastDataRowIndex][indentNumberIndex];
       console.log('Last indent number found:', lastIndentNumber);
-      
-      // Extract numeric part from "REC-01" format
-      let numericValue = 0;
-      if (typeof lastIndentNumber === 'string') {
-        const match = lastIndentNumber.match(/\d+/);
-        numericValue = match ? parseInt(match[0]) : 0;
-      } else {
-        numericValue = parseInt(lastIndentNumber) || 0;
-      }
+      console.log('Max numeric value:', maxNumericValue);
       
       return {
         success: true,
-        lastIndentNumber: numericValue,
+        lastIndentNumber: maxNumericValue,
         fullLastIndent: lastIndentNumber
       };
     } else {
       return {
         success: true,
         lastIndentNumber: 0,
-        message: 'Sheet is empty or has no data rows'
+        message: 'Sheet is empty or has insufficient data rows'
       };
     }
   } catch (error) {
@@ -464,7 +445,7 @@ const fetchLastIndentNumber = async () => {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Post (पद)*
+                  Post*
                 </label>
                 <input
                   type="text"
@@ -479,7 +460,7 @@ const fetchLastIndentNumber = async () => {
 
                 <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Company (कंपनी) <span className="text-red-500">*</span>
+              Company<span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -494,7 +475,7 @@ const fetchLastIndentNumber = async () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gender (लिंग) *
+                  Gender*
                 </label>
                 <select
                   name="gender"
@@ -512,7 +493,7 @@ const fetchLastIndentNumber = async () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Department (विभाग)
+                  Department
                 </label>
                 <select
                   name="department"
@@ -530,7 +511,7 @@ const fetchLastIndentNumber = async () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Prefer (प्राथमिकता)
+                  Prefer
                 </label>
                 <select
                   name="prefer"
@@ -548,7 +529,7 @@ const fetchLastIndentNumber = async () => {
               {formData.prefer === "Experience" && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Experience (अनुभव) *
+                    Experience*
                   </label>
                   <input
                     type="text"
@@ -564,7 +545,7 @@ const fetchLastIndentNumber = async () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Number Of Post (पद की संख्या) *
+                  Number Of Post*
                 </label>
                 <input
                   type="number"
@@ -580,7 +561,7 @@ const fetchLastIndentNumber = async () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Competition Date (समापन तिथि) *
+                  Competition Date*
                 </label>
                 <input
                   type="date"

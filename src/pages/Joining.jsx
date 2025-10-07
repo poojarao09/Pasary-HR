@@ -15,21 +15,21 @@ const Joining = () => {
   const [followUpData, setFollowUpData] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-const [shareFormData, setShareFormData] = useState({
-  recipientName: '',
-  recipientEmail: '',
-  subject: 'Candidate Joining Details',
-  message: 'Please find the candidate joining details attached below.',
-});
+  const [shareFormData, setShareFormData] = useState({
+    recipientName: '',
+    recipientEmail: '',
+    subject: 'Candidate Joining Details',
+    message: 'Please find the candidate joining details attached below.',
+  });
   const [formData, setFormData] = useState({
     candidateSays: '',
     status: '',
     nextDate: ''
   });
   const [joiningFormData, setJoiningFormData] = useState({
-  joiningId: '',
-  nameAsPerAadhar: '',
-  fatherName: '',
+    joiningId: '',
+    nameAsPerAadhar: '',
+    fatherName: '',
     dateOfJoining: '',
     joiningPlace: '',
     designation: '',
@@ -70,48 +70,48 @@ const [shareFormData, setShareFormData] = useState({
   });
 
   function handleEmailShare(params) {
-  try {
-    console.log("Handling email share with params:", JSON.stringify({
-      recipientEmail: params.recipientEmail,
-      subject: params.subject,
-      message: params.message ? params.message.substring(0, 100) + "..." : "empty",
-      hasDocuments: !!params.documents
-    }));
-    
-    // Validate required parameters
-    if (!params.recipientEmail || !params.subject || !params.message) {
-      throw new Error("Missing required email parameters: recipientEmail, subject, or message");
-    }
-    
-    // Parse documents if provided
-    var documents = [];
-    if (params.documents) {
-      try {
-        documents = JSON.parse(params.documents);
-      } catch (e) {
-        console.warn("Failed to parse documents:", e);
+    try {
+      console.log("Handling email share with params:", JSON.stringify({
+        recipientEmail: params.recipientEmail,
+        subject: params.subject,
+        message: params.message ? params.message.substring(0, 100) + "..." : "empty",
+        hasDocuments: !!params.documents
+      }));
+
+      // Validate required parameters
+      if (!params.recipientEmail || !params.subject || !params.message) {
+        throw new Error("Missing required email parameters: recipientEmail, subject, or message");
       }
-    }
-    
-    // Prepare email content with HTML formatting
-    var emailSubject = params.subject;
-    var htmlBody = `
+
+      // Parse documents if provided
+      var documents = [];
+      if (params.documents) {
+        try {
+          documents = JSON.parse(params.documents);
+        } catch (e) {
+          console.warn("Failed to parse documents:", e);
+        }
+      }
+
+      // Prepare email content with HTML formatting
+      var emailSubject = params.subject;
+      var htmlBody = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <p>${params.message.replace(/\n/g, '<br>')}</p>
     `;
-    
-    // Add document details to email body if available
-    if (documents.length > 0) {
-      htmlBody += `
+
+      // Add document details to email body if available
+      if (documents.length > 0) {
+        htmlBody += `
         <h3 style="color: #333; border-bottom: 2px solid #4f46e5; padding-bottom: 5px;">
           Candidate Details:
         </h3>
         <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
       `;
-      
-      for (var i = 0; i < documents.length; i++) {
-        var doc = documents[i];
-        htmlBody += `
+
+        for (var i = 0; i < documents.length; i++) {
+          var doc = documents[i];
+          htmlBody += `
           <tr>
             <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background-color: #f9f9f9;">Candidate Name:</td>
             <td style="padding: 8px; border: 1px solid #ddd;">${doc.name || 'N/A'}</td>
@@ -129,9 +129,9 @@ const [shareFormData, setShareFormData] = useState({
             <td style="padding: 8px; border: 1px solid #ddd;">${doc.category || 'N/A'}</td>
           </tr>
         `;
-        
-        if (doc.imageUrl) {
-          htmlBody += `
+
+          if (doc.imageUrl) {
+            htmlBody += `
             <tr>
               <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background-color: #f9f9f9;">Photo:</td>
               <td style="padding: 8px; border: 1px solid #ddd;">
@@ -139,16 +139,16 @@ const [shareFormData, setShareFormData] = useState({
               </td>
             </tr>
           `;
+          }
+
+          htmlBody += `<tr><td colspan="2" style="padding: 10px; background-color: #f0f0f0;"></td></tr>`;
         }
-        
-        htmlBody += `<tr><td colspan="2" style="padding: 10px; background-color: #f0f0f0;"></td></tr>`;
+
+        htmlBody += `</table>`;
       }
-      
-      htmlBody += `</table>`;
-    }
-    
-    // Add fixed Google.com link
-    htmlBody += `
+
+      // Add fixed Google.com link
+      htmlBody += `
       <h3 style="color: #333; border-bottom: 2px solid #4f46e5; padding-bottom: 5px;">
         Useful Links:
       </h3>
@@ -163,245 +163,265 @@ const [shareFormData, setShareFormData] = useState({
       </p>
       </div>
     `;
-    
-    // Plain text version for email clients that don't support HTML
-    var plainBody = params.message + "\n\n";
-    if (documents.length > 0) {
-      plainBody += "Candidate Details:\n";
-      plainBody += "==================\n\n";
-      for (var i = 0; i < documents.length; i++) {
-        var doc = documents[i];
-        plainBody += `Candidate Name: ${doc.name || 'N/A'}\n`;
-        plainBody += `Enquiry No: ${doc.serialNo || 'N/A'}\n`;
-        plainBody += `Position: ${doc.documentType || 'N/A'}\n`;
-        plainBody += `Department: ${doc.category || 'N/A'}\n`;
-        if (doc.imageUrl) {
-          plainBody += `Photo: ${doc.imageUrl}\n`;
+
+      // Plain text version for email clients that don't support HTML
+      var plainBody = params.message + "\n\n";
+      if (documents.length > 0) {
+        plainBody += "Candidate Details:\n";
+        plainBody += "==================\n\n";
+        for (var i = 0; i < documents.length; i++) {
+          var doc = documents[i];
+          plainBody += `Candidate Name: ${doc.name || 'N/A'}\n`;
+          plainBody += `Enquiry No: ${doc.serialNo || 'N/A'}\n`;
+          plainBody += `Position: ${doc.documentType || 'N/A'}\n`;
+          plainBody += `Department: ${doc.category || 'N/A'}\n`;
+          if (doc.imageUrl) {
+            plainBody += `Photo: ${doc.imageUrl}\n`;
+          }
+          plainBody += "\n";
         }
-        plainBody += "\n";
       }
-    }
-    plainBody += "\nUseful Links:\n";
-    plainBody += "=============\n";
-    plainBody += "Google.com: https://www.google.com\n\n";
-    plainBody += "This email was sent via Joining Management System.";
-    
-    // Send the email
-    MailApp.sendEmail({
-      to: params.recipientEmail,
-      subject: emailSubject,
-      body: plainBody,
-      htmlBody: htmlBody
-    });
-    
-    console.log("Email sent successfully to:", params.recipientEmail);
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      success: true,
-      message: "Email sent successfully to " + params.recipientEmail
-    })).setMimeType(ContentService.MimeType.JSON);
-    
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return ContentService.createTextOutput(JSON.stringify({
-      success: false,
-      error: "Failed to send email: " + error.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
+      plainBody += "\nUseful Links:\n";
+      plainBody += "=============\n";
+      plainBody += "Google.com: https://www.google.com\n\n";
+      plainBody += "This email was sent via Joining Management System.";
 
-const handleShareClick = (item) => {
-  setSelectedItem(item);
-  // Create the share link with enquiry number
-  const shareLink = `https://hr-fms-passary-joining-form.vercel.app/?enquiry=${item.candidateEnquiryNo || ''}`;
-  
-  setShareFormData({
-    recipientName: item.candidateName || '', // Auto-fill from Column E
-    recipientEmail: item.candidateEmail || '', // Auto-fill from Column H
-    subject: 'Candidate Joining Details - ' + item.candidateName,
-    message: `Dear Recipient,\n\nPlease find the joining details for candidate ${item.candidateName} who is applying for the position of ${item.applyingForPost}.\n\nCandidate Details:\n- Name: ${item.candidateName}\n- Position: ${item.applyingForPost}\n- Department: ${item.department}\n- Phone: ${item.candidatePhone}\n- Email: ${item.candidateEmail}\n- Candidate Enquiry Number: ${item.candidateEnquiryNo}\n\nJoining Form Link: ${shareLink}\n\nBest regards,\nHR Team`,
-  });
-  
-  // Log the share link to console
-  console.log("Share Link:", shareLink);
-  
-  setShowShareModal(true);
-};
-
-const handleShareSubmit = async (e) => {
-  e.preventDefault();
-  setSubmitting(true);
-  
-  try {
-    const documents = [{
-      name: selectedItem.candidateName,
-      serialNo: selectedItem.candidateEnquiryNo,
-      documentType: selectedItem.applyingForPost,
-      category: selectedItem.department,
-      imageUrl: selectedItem.candidatePhoto || ''
-    }];
-    
-    const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
-    
-    const params = new URLSearchParams();
-    params.append('action', 'shareViaEmail');
-    params.append('recipientEmail', shareFormData.recipientEmail);
-    params.append('subject', shareFormData.subject);
-    params.append('message', shareFormData.message);
-    params.append('documents', JSON.stringify(documents));
-    
-    const response = await fetch(URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params,
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to send email');
-    }
-    
-    toast.success('Details shared successfully!');
-    setShowShareModal(false);
-  } catch (error) {
-    console.error('Error sharing details:', error);
-    toast.error(`Failed to share details: ${error.message}`);
-  } finally {
-    setSubmitting(false);
-  }
-};
-
-const handleShareInputChange = (e) => {
-  const { name, value } = e.target;
-  setShareFormData(prev => ({
-    ...prev,
-    [name]: value
-  }));
-};
-
-const fetchJoiningData = async () => {
-  setLoading(true);
-  setTableLoading(true);
-  setError(null);
-
-  try {
-    const [enquiryResponse, followUpResponse] = await Promise.all([
-      fetch(
-        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=ENQUIRY&action=fetch"
-      ),
-      fetch(
-        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Follow - Up&action=fetch"
-      ),
-    ]);
-
-    if (!enquiryResponse.ok || !followUpResponse.ok) {
-      throw new Error(
-        `HTTP error! status: ${enquiryResponse.status} or ${followUpResponse.status}`
-      );
-    }
-
-    const [enquiryResult, followUpResult] = await Promise.all([
-      enquiryResponse.json(),
-      followUpResponse.json(),
-    ]);
-
-    if (
-      !enquiryResult.success ||
-      !enquiryResult.data ||
-      enquiryResult.data.length < 7
-    ) {
-      throw new Error(
-        enquiryResult.error || "Not enough rows in enquiry sheet data"
-      );
-    }
-
-    // Process enquiry data
-    const enquiryHeaders = enquiryResult.data[5].map((h) => h.trim());
-    const enquiryDataFromRow7 = enquiryResult.data.slice(6);
-    
-
-    const getIndex = (headerName) =>
-      enquiryHeaders.findIndex((h) => h === headerName);
-
-    const departmentIndex = getIndex("Department");
-     const abIndex = 27; // Column AB index (0-based index 27)
-
-    const processedEnquiryData = enquiryDataFromRow7
-      .map((row) => ({
-        id: row[getIndex("Timestamp")],
-        indentNo: row[getIndex("Indent Number")],
-        candidateEnquiryNo: row[getIndex("Candidate Enquiry Number")],
-        applyingForPost: row[getIndex("Applying For the Post")],
-         department: row[departmentIndex] || "",
-        candidateName: row[getIndex("Candidate Name")],
-        candidateDOB: row[getIndex("DOB")],
-        candidatePhone: row[getIndex("Candidate Phone Number")],
-        candidateEmail: row[getIndex("Candidate Email")],
-        previousCompany: row[getIndex("Previous Company Name")],
-        jobExperience: row[getIndex("Job Experience")] || "",
-        lastSalary: row[getIndex("Last Salary Drawn")] || "",
-        previousPosition: row[getIndex("Previous Position")] || "",
-        reasonForLeaving:
-          row[getIndex("Reason Of Leaving Previous Company")] || "",
-        maritalStatus: row[getIndex("Marital Status")] || "",
-        lastEmployerMobile: row[getIndex("Last Employer Mobile Number")] || "",
-        candidatePhoto: row[getIndex("Candidate Photo")] || "",
-        candidateResume: row[19] || "",
-        referenceBy: row[getIndex("Reference By")] || "",
-        presentAddress: row[getIndex("Present Address")] || "",
-        aadharNo: row[getIndex("Aadhar Number")] || "",
-        designation: row[getIndex("Applying For the Post")] || "",
-        actualDate: row[26] || "", // Column AA (index 26) - Actual date
-        joiningDate: row[abIndex] || "" // Column AB (index 27)
-      }))
-      // Filter out items with null/empty values in Column AA
-      .filter(item => item.actualDate && item.actualDate.trim() !== "")
-      // Filter out items with non-null values in Column AB
-      .filter(item => !item.joiningDate || item.joiningDate.trim() === "");
-      
-      
-
-    // Process follow-up data for filtering
-    if (followUpResult.success && followUpResult.data) {
-      const rawFollowUpData = followUpResult.data || followUpResult;
-      const followUpRows = Array.isArray(rawFollowUpData[0])
-        ? rawFollowUpData.slice(1)
-        : rawFollowUpData;
-
-      const processedFollowUpData = followUpRows.map((row) => ({
-        enquiryNo: row[1] || "", // Column B (index 1) - Enquiry No
-        status: row[2] || "", // Column C (index 2) - Status
-      }));
-
-      setFollowUpData(processedFollowUpData);
-      
-      // Filter data to show only items with "Joining" status in follow-up sheet
-      const joiningItems = processedEnquiryData.filter(item => {
-        const hasJoiningStatus = processedFollowUpData.some(followUp => 
-          followUp.enquiryNo === item.candidateEnquiryNo && 
-          followUp.status === 'Joining'
-        );
-        return hasJoiningStatus;
+      // Send the email
+      MailApp.sendEmail({
+        to: params.recipientEmail,
+        subject: emailSubject,
+        body: plainBody,
+        htmlBody: htmlBody
       });
-      
-      setJoiningData(joiningItems);
+
+      console.log("Email sent successfully to:", params.recipientEmail);
+
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true,
+        message: "Email sent successfully to " + params.recipientEmail
+      })).setMimeType(ContentService.MimeType.JSON);
+
+    } catch (error) {
+      console.error("Error sending email:", error);
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        error: "Failed to send email: " + error.toString()
+      })).setMimeType(ContentService.MimeType.JSON);
     }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    setError(error.message);
-    toast.error("Failed to fetch data");
-  } finally {
-    setLoading(false);
-    setTableLoading(false);
   }
-};
+
+  const handleShareClick = (item) => {
+    setSelectedItem(item);
+    // Create the share link with enquiry number
+    const shareLink = `https://hr-fms-passary-joining-form.vercel.app/?enquiry=${item.candidateEnquiryNo || ''}`;
+
+    setShareFormData({
+      recipientName: item.candidateName || '', // Auto-fill from Column E
+      recipientEmail: item.candidateEmail || '', // Auto-fill from Column H
+      subject: 'Candidate Joining Details - ' + item.candidateName,
+      message: `Dear Recipient,\n\nPlease find the joining details for candidate ${item.candidateName} who is applying for the position of ${item.applyingForPost}.\n\nCandidate Details:\n- Name: ${item.candidateName}\n- Position: ${item.applyingForPost}\n- Department: ${item.department}\n- Phone: ${item.candidatePhone}\n- Email: ${item.candidateEmail}\n- Candidate Enquiry Number: ${item.candidateEnquiryNo}\n\nJoining Form Link: ${shareLink}\n\nBest regards,\nHR Team`,
+    });
+
+    // Log the share link to console
+    console.log("Share Link:", shareLink);
+
+    setShowShareModal(true);
+  };
+
+  const handleShareSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const documents = [{
+        name: selectedItem.candidateName,
+        serialNo: selectedItem.candidateEnquiryNo,
+        documentType: selectedItem.applyingForPost,
+        category: selectedItem.department,
+        imageUrl: selectedItem.candidatePhoto || ''
+      }];
+
+      const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
+
+      const params = new URLSearchParams();
+      params.append('action', 'shareViaEmail');
+      params.append('recipientEmail', shareFormData.recipientEmail);
+      params.append('subject', shareFormData.subject);
+      params.append('message', shareFormData.message);
+      params.append('documents', JSON.stringify(documents));
+
+      const response = await fetch(URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to send email');
+      }
+
+      toast.success('Details shared successfully!');
+      setShowShareModal(false);
+    } catch (error) {
+      console.error('Error sharing details:', error);
+      toast.error(`Failed to share details: ${error.message}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleShareInputChange = (e) => {
+    const { name, value } = e.target;
+    setShareFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const fetchJoiningData = async () => {
+    setLoading(true);
+    setTableLoading(true);
+    setError(null);
+
+    try {
+      const [enquiryResponse, followUpResponse] = await Promise.all([
+        fetch(
+          "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=ENQUIRY&action=fetch"
+        ),
+        fetch(
+          "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Follow - Up&action=fetch"
+        ),
+      ]);
+
+      if (!enquiryResponse.ok || !followUpResponse.ok) {
+        throw new Error(
+          `HTTP error! status: ${enquiryResponse.status} or ${followUpResponse.status}`
+        );
+      }
+
+      const [enquiryResult, followUpResult] = await Promise.all([
+        enquiryResponse.json(),
+        followUpResponse.json(),
+      ]);
+
+      if (
+        !enquiryResult.success ||
+        !enquiryResult.data ||
+        enquiryResult.data.length < 7
+      ) {
+        throw new Error(
+          enquiryResult.error || "Not enough rows in enquiry sheet data"
+        );
+      }
+
+      // Process enquiry data
+      const enquiryHeaders = enquiryResult.data[5].map((h) => h.trim());
+      const enquiryDataFromRow7 = enquiryResult.data.slice(6);
+
+
+      const getIndex = (headerName) =>
+        enquiryHeaders.findIndex((h) => h === headerName);
+
+      const departmentIndex = getIndex("Department");
+      const abIndex = 27; // Column AB index (0-based index 27)
+
+      const processedEnquiryData = enquiryDataFromRow7
+        .map((row) => ({
+          id: row[getIndex("Timestamp")],
+          indentNo: row[getIndex("Indent Number")],
+          candidateEnquiryNo: row[getIndex("Candidate Enquiry Number")],
+          applyingForPost: row[getIndex("Applying For the Post")],
+          department: row[departmentIndex] || "",
+          candidateName: row[getIndex("Candidate Name")],
+          candidateDOB: row[getIndex("DOB")],
+          candidatePhone: row[getIndex("Candidate Phone Number")],
+          candidateEmail: row[getIndex("Candidate Email")],
+          previousCompany: row[getIndex("Previous Company Name")],
+          jobExperience: row[getIndex("Job Experience")] || "",
+          lastSalary: row[getIndex("Last Salary Drawn")] || "",
+          previousPosition: row[getIndex("Previous Position")] || "",
+          reasonForLeaving:
+            row[getIndex("Reason Of Leaving Previous Company")] || "",
+          maritalStatus: row[getIndex("Marital Status")] || "",
+          lastEmployerMobile: row[getIndex("Last Employer Mobile Number")] || "",
+          candidatePhoto: row[getIndex("Candidate Photo")] || "",
+          candidateResume: row[19] || "",
+          referenceBy: row[getIndex("Reference By")] || "",
+          presentAddress: row[getIndex("Present Address")] || "",
+          aadharNo: row[getIndex("Aadhar Number")] || "",
+          designation: row[getIndex("Applying For the Post")] || "",
+          actualDate: row[26] || "",
+          plannedDate: row[27] || "",
+          actualJoiningDate: row[28] || ""
+        }));
+
+      // Debug: Check raw data
+      console.log("Total processed items:", processedEnquiryData.length);
+      console.log("Sample item with AB and AC:", processedEnquiryData[0]);
+
+      // Check items with plannedDate
+      const itemsWithPlanned = processedEnquiryData.filter(item =>
+        item.plannedDate && item.plannedDate.trim() !== ""
+      );
+      console.log("Items with plannedDate (AB):", itemsWithPlanned.length);
+      console.log("Sample planned item:", itemsWithPlanned[0]);
+
+      // Check items without actualJoiningDate
+      const itemsWithoutActual = itemsWithPlanned.filter(item =>
+        !item.actualJoiningDate || item.actualJoiningDate.trim() === ""
+      );
+      console.log("Items without actualJoiningDate (AC):", itemsWithoutActual.length);
+      console.log("Sample filtered item:", itemsWithoutActual[0]);
+
+      // Final filtered data
+      const filteredData = processedEnquiryData
+        .filter(item => item.plannedDate && item.plannedDate.trim() !== "")
+        .filter(item => !item.actualJoiningDate || item.actualJoiningDate.trim() === "");
+
+      console.log("Final filtered count:", filteredData.length);
+
+      // Process follow-up data for filtering
+      if (followUpResult.success && followUpResult.data) {
+        const rawFollowUpData = followUpResult.data || followUpResult;
+        const followUpRows = Array.isArray(rawFollowUpData[0])
+          ? rawFollowUpData.slice(1)
+          : rawFollowUpData;
+
+        const processedFollowUpData = followUpRows.map((row) => ({
+          enquiryNo: row[2] || "", // Column B (index 1) - Enquiry No
+          status: row[3] || "", // Column C (index 2) - Status
+        }));
+
+        setFollowUpData(processedFollowUpData);
+
+        // Filter data to show only items with "Joining" status in follow-up sheet
+        const joiningItems = processedEnquiryData.filter(item => {
+          const hasJoiningStatus = processedFollowUpData.some(followUp =>
+            followUp.enquiryNo === item.candidateEnquiryNo &&
+            followUp.status === 'Joining'
+          );
+          return hasJoiningStatus;
+        });
+
+        setJoiningData(joiningItems);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError(error.message);
+      toast.error("Failed to fetch data");
+    } finally {
+      setLoading(false);
+      setTableLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchJoiningData();
@@ -413,11 +433,11 @@ const fetchJoiningData = async () => {
   };
 
   const handleJoiningClick = (item) => {
-  setSelectedItem(item);
-  setJoiningFormData({
-    joiningId: '', // Initialize with empty value
-    nameAsPerAadhar: item.candidateName || '',
-    fatherName: '',
+    setSelectedItem(item);
+    setJoiningFormData({
+      joiningId: '', // Initialize with empty value
+      nameAsPerAadhar: item.candidateName || '',
+      fatherName: '',
       dateOfJoining: '',
       joiningPlace: '',
       designation: item.designation || '',
@@ -461,9 +481,9 @@ const fetchJoiningData = async () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
-    
+
     let date;
-    
+
     if (dateString instanceof Date) {
       date = dateString;
     } else if (typeof dateString === 'string') {
@@ -476,93 +496,93 @@ const fetchJoiningData = async () => {
         date = new Date(dateString);
       }
     }
-    
+
     if (!date || isNaN(date.getTime())) {
       return dateString || '';
     }
-    
+
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    
+
     return `${day}/${month}/${year}`;
   };
 
-const formatDOB = (dateString) => {
-  if (!dateString) return '';
-  
-  // If it's already in dd/mm/yyyy format, return as is
-  if (typeof dateString === 'string' && dateString.includes('/')) {
-    const parts = dateString.split('/');
-    if (parts.length === 3) {
-      // Check if it's already in dd/mm/yyyy format
-      const day = parseInt(parts[0]);
-      const month = parseInt(parts[1]);
-      
-      if (day > 0 && day <= 31 && month > 0 && month <= 12) {
-        // If day is greater than 12, it's likely dd/mm/yyyy format
-        if (day > 12) {
-          return dateString; // Return as is (dd/mm/yyyy)
-        }
-        // If month is greater than 12, it's likely mm/dd/yyyy format
-        else if (month > 12) {
-          return `${parts[1]}/${parts[0]}/${parts[2]}`; // Swap day and month
-        }
-      }
-    }
-  }
-  
-  // For other cases, try to parse as Date object
-  let date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    return dateString; // Return original if can't parse
-  }
-  
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  
-  return `${day}/${month}/${year}`;
-};
+  const formatDOB = (dateString) => {
+    if (!dateString) return '';
 
-// Add a function to format date for storage (mm/dd/yyyy)
-const formatDateForStorage = (dateString) => {
-  if (!dateString) return '';
-  
-  // If it's in dd/mm/yyyy format, convert to mm/dd/yyyy
-  if (typeof dateString === 'string' && dateString.includes('/')) {
-    const parts = dateString.split('/');
-    if (parts.length === 3) {
-      const day = parseInt(parts[0]);
-      const month = parseInt(parts[1]);
-      
-      // If it's already in dd/mm/yyyy format, swap day and month
-      if (day > 0 && day <= 31 && month > 0 && month <= 12 && day > 12) {
-        return `${parts[1]}/${parts[0]}/${parts[2]}`;
+    // If it's already in dd/mm/yyyy format, return as is
+    if (typeof dateString === 'string' && dateString.includes('/')) {
+      const parts = dateString.split('/');
+      if (parts.length === 3) {
+        // Check if it's already in dd/mm/yyyy format
+        const day = parseInt(parts[0]);
+        const month = parseInt(parts[1]);
+
+        if (day > 0 && day <= 31 && month > 0 && month <= 12) {
+          // If day is greater than 12, it's likely dd/mm/yyyy format
+          if (day > 12) {
+            return dateString; // Return as is (dd/mm/yyyy)
+          }
+          // If month is greater than 12, it's likely mm/dd/yyyy format
+          else if (month > 12) {
+            return `${parts[1]}/${parts[0]}/${parts[2]}`; // Swap day and month
+          }
+        }
       }
     }
-  }
-  
-  // For other cases, try to parse as Date object
-  let date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    return dateString;
-  }
-  
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  
-  return `${month}/${day}/${year}`;
-};
+
+    // For other cases, try to parse as Date object
+    let date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString; // Return original if can't parse
+    }
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
+
+  // Add a function to format date for storage (mm/dd/yyyy)
+  const formatDateForStorage = (dateString) => {
+    if (!dateString) return '';
+
+    // If it's in dd/mm/yyyy format, convert to mm/dd/yyyy
+    if (typeof dateString === 'string' && dateString.includes('/')) {
+      const parts = dateString.split('/');
+      if (parts.length === 3) {
+        const day = parseInt(parts[0]);
+        const month = parseInt(parts[1]);
+
+        // If it's already in dd/mm/yyyy format, swap day and month
+        if (day > 0 && day <= 31 && month > 0 && month <= 12 && day > 12) {
+          return `${parts[1]}/${parts[0]}/${parts[2]}`;
+        }
+      }
+    }
+
+    // For other cases, try to parse as Date object
+    let date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${month}/${day}/${year}`;
+  };
 
   const handleJoiningInputChange = (e) => {
-  const { name, value } = e.target;
-  setJoiningFormData(prev => ({
-    ...prev,
-    [name]: value
-  }));
-};
+    const { name, value } = e.target;
+    setJoiningFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleFileChange = (e, fieldName) => {
     const file = e.target.files[0];
@@ -620,7 +640,7 @@ const formatDateForStorage = (dateString) => {
     }
   };
 
-  const uploadFileToDrive = async (file, folderId = '19SEjZdQMyE3Rz8EbFeBbudqbmD3DA0A9') => {
+  const uploadFileToDrive = async (file, folderId = '1O0D_zo4dr9qYLq6GKS2jubR5WUXhV0lB') => {
     try {
       const reader = new FileReader();
       const base64Data = await new Promise((resolve, reject) => {
@@ -652,7 +672,7 @@ const formatDateForStorage = (dateString) => {
       }
 
       const data = await response.json();
-      
+
       if (!data.success) {
         throw new Error(data.error || 'File upload failed');
       }
@@ -665,41 +685,64 @@ const formatDateForStorage = (dateString) => {
     }
   };
 
-const updateEnquirySheet = async (enquiryNo, timestamp) => {
-  const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
+  const updateEnquirySheet = async (enquiryNo, timestamp) => {
+    const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
 
-  try {
-    const params = new URLSearchParams();
-    params.append('sheetName', 'ENQUIRY');
-    params.append('action', 'updateEnquiryColumn');
-    params.append('enquiryNo', enquiryNo);
-    params.append('timestamp', timestamp);
+    try {
+      const params = new URLSearchParams();
+      params.append('sheetName', 'ENQUIRY');
+      params.append('action', 'updateEnquiryColumn');
+      params.append('enquiryNo', enquiryNo);
+      params.append('timestamp', timestamp);
 
-    const response = await fetch(URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params,
-    });
+      const response = await fetch(URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params,
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.success;
+    } catch (error) {
+      console.error('Error updating enquiry sheet:', error);
+      throw new Error(`Failed to update enquiry sheet: ${error.message}`);
     }
+  };
 
-    const data = await response.json();
-    return data.success;
-  } catch (error) {
-    console.error('Error updating enquiry sheet:', error);
-    throw new Error(`Failed to update enquiry sheet: ${error.message}`);
-  }
-};
-
-const handleJoiningSubmit = async (e) => {
+ const handleJoiningSubmit = async (e) => {
   e.preventDefault();
   setSubmitting(true);
-  
+
   try {
+    // Fetch current JOINING sheet data to get last serial number
+    const joiningSheetResponse = await fetch(
+      "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=JOINING&action=fetch"
+    );
+    
+    let serialNumber = 'SN-001'; // Default first ID
+    
+    if (joiningSheetResponse.ok) {
+      const joiningResult = await joiningSheetResponse.json();
+      if (joiningResult.success && joiningResult.data && joiningResult.data.length > 1) {
+        // Get the last row's joining ID (Column B, index 1)
+        const lastRow = joiningResult.data[joiningResult.data.length - 1];
+        const lastId = lastRow[1]; // Column B
+        
+        if (lastId && lastId.startsWith('SN-')) {
+          // Extract number and increment
+          const lastNumber = parseInt(lastId.split('-')[1]);
+          const newNumber = lastNumber + 1;
+          serialNumber = 'SN-' + String(newNumber).padStart(3, '0');
+        }
+      }
+    }
+
     // Upload only the required files
     const uploadPromises = {};
     const fileFields = [
@@ -717,7 +760,7 @@ const handleJoiningSubmit = async (e) => {
 
     // Wait for all uploads to complete
     const uploadedUrls = await Promise.all(
-      Object.values(uploadPromises).map(promise => 
+      Object.values(uploadPromises).map(promise =>
         promise.catch(error => {
           console.error('Upload failed:', error);
           return ''; // Return empty string if upload fails
@@ -731,26 +774,26 @@ const handleJoiningSubmit = async (e) => {
       fileUrls[field] = uploadedUrls[index];
     });
 
-     const now = new Date();
+    const now = new Date();
     const formattedTimestamp = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-    
+
     const formatDateForStorage = (dateString) => {
       if (!dateString) return '';
-      
+
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return dateString;
-      
+
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const year = date.getFullYear();
-      
+
       return `${month}/${day}/${year}`;
     };
-    
+
     // Format DOB for storage (mm/dd/yyyy)
     const formatDOBForStorage = (dateString) => {
       if (!dateString) return '';
-      
+
       // If it's in dd/mm/yyyy format, convert to mm/dd/yyyy
       if (typeof dateString === 'string' && dateString.includes('/')) {
         const parts = dateString.split('/');
@@ -758,31 +801,31 @@ const handleJoiningSubmit = async (e) => {
           return `${parts[1]}/${parts[0]}/${parts[2]}`;
         }
       }
-      
+
       // For other cases, try to parse as Date object
       let date = new Date(dateString);
       if (isNaN(date.getTime())) {
         return dateString;
       }
-      
+
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const year = date.getFullYear();
-      
+
       return `${month}/${day}/${year}`;
     };
-    
+
     // Create an array with all column values in order
     const rowData = [];
-    
+
     // Assign values directly to array indices according to specified columns
     rowData[0] = formattedTimestamp;           // Column A: Timestamp
-    rowData[1] = joiningFormData.joiningId;    // Column B: Joining ID
+    rowData[1] = serialNumber;                    // Column B: Joining ID (AUTO GENERATED)
     rowData[2] = selectedItem.candidateName;   // Column C: Name As Per Aadhar
     rowData[3] = joiningFormData.fatherName;   // Column D: Father Name
     rowData[4] = formatDateForStorage(joiningFormData.dateOfJoining); // Column E: Date Of Joining (mm/dd/yyyy)
     rowData[5] = selectedItem.designation || selectedItem.applyingForPost; // Column F: Designation
-    rowData[6] = fileUrls.aadharFrontPhoto;    // Column G: Aadhar card
+    rowData[6] = fileUrls.aadharFrontPhoto || '';    // Column G: Aadhar card
     rowData[7] = selectedItem.candidatePhoto;  // Column H: Candidate Photo
     rowData[8] = selectedItem.presentAddress;  // Column I: Current Address
     rowData[9] = formatDOBForStorage(selectedItem.candidateDOB); // Column J: Date Of Birth (mm/dd/yyyy)
@@ -793,16 +836,15 @@ const handleJoiningSubmit = async (e) => {
     rowData[14] = joiningFormData.currentBankAc; // Column O: Current Account No
     rowData[15] = joiningFormData.ifscCode;    // Column P: IFSC Code
     rowData[16] = joiningFormData.branchName;  // Column Q: Branch Name
-    rowData[17] = fileUrls.bankPassbookPhoto;  // Column R: Photo Of Front Bank Passbook
+    rowData[17] = fileUrls.bankPassbookPhoto || '';  // Column R: Photo Of Front Bank Passbook
     rowData[18] = selectedItem.candidateEmail; // Column S: Candidate Email
     rowData[19] = joiningFormData.highestQualification; // Column T: Highest Qualification
     rowData[20] = selectedItem.department || '';  // Column U: Department
-    rowData[21] = joiningFormData.equipment;   // Column V: Equipment
-    rowData[22] = selectedItem.aadharNo;       // Column W: Aadhar Number
-    rowData[23] = selectedItem.candidateResume; // Column X: Candidate Resume
+    rowData[21] = selectedItem.aadharNo;       // Column W: Aadhar Number
+    rowData[22] = selectedItem.candidateResume; // Column X: Candidate Resume
+    rowData[23] = "";
     rowData[24] = "";
-    rowData[25] = "";
-    rowData[26] = selectedItem.actualDate || formattedTimestamp; // Column AA: Actual Date
+    rowData[25] = selectedItem.actualDate || formattedTimestamp; // Column AA: Actual Date
 
     await postToJoiningSheet(rowData);
 
@@ -825,8 +867,8 @@ const handleJoiningSubmit = async (e) => {
 
   const filteredJoiningData = joiningData.filter(item => {
     const matchesSearch = item.candidateName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.applyingForPost?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.candidatePhone?.toLowerCase().includes(searchTerm.toLowerCase());
+      item.applyingForPost?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.candidatePhone?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
@@ -860,11 +902,10 @@ const handleJoiningSubmit = async (e) => {
         <div className="border-b border-gray-300 border-opacity-20">
           <nav className="flex -mb-px">
             <button
-              className={`py-4 px-6 font-medium text-sm border-b-2 ${
-                activeTab === "pending"
+              className={`py-4 px-6 font-medium text-sm border-b-2 ${activeTab === "pending"
                   ? "border-indigo-500 text-indigo-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+                }`}
               onClick={() => setActiveTab("pending")}
             >
               <Clock size={16} className="inline mr-2" />
@@ -958,13 +999,13 @@ const handleJoiningSubmit = async (e) => {
                             >
                               Joining
                             </button>
-                            <button
+                            {/* <button
                               onClick={() => handleShareClick(item)}
                               className="px-3 py-1 text-white bg-blue-600 rounded-md hover:bg-opacity-90 text-sm flex items-center"
                             >
                               <Share size={14} className="mr-1" />
                               Share
-                            </button>
+                            </button> */}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -1049,9 +1090,9 @@ const handleJoiningSubmit = async (e) => {
             <form onSubmit={handleJoiningSubmit} className="p-6 space-y-6">
               {/* Section 1: Basic Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Joining ID (जॉइनिंग आईडी)
+                    Joining ID
                   </label>
                   <input
                     type="text"
@@ -1060,11 +1101,11 @@ const handleJoiningSubmit = async (e) => {
                     onChange={handleJoiningInputChange}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
                   />
-                </div>
+                </div> */}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Name As Per Aadhar (नाम आधार के अनुसार)
+                    Name As Per Aadhar
                   </label>
                   <input
                     type="text"
@@ -1075,7 +1116,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Father Name (पिता का नाम)
+                    Father Name
                   </label>
                   <input
                     type="text"
@@ -1087,7 +1128,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date Of Birth As per Aadhar (जन्मतिथि आधार के अनुसार)
+                    Date Of Birth As per Aadhar
                   </label>
                   <input
                     type="text"
@@ -1098,7 +1139,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Gender (लिंग)
+                    Gender
                   </label>
                   <select
                     name="gender"
@@ -1106,15 +1147,15 @@ const handleJoiningSubmit = async (e) => {
                     onChange={handleJoiningInputChange}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
                   >
-                    <option value="">Select Gender (लिंग चुनें)</option>
-                    <option value="Male">Male (पुरुष)</option>
-                    <option value="Female">Female (महिला) </option>
-                    <option value="Other">Other (अन्य)</option>
+                    <option value="">Select Gender </option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female  </option>
+                    <option value="Other">Other </option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Department (विभाग)
+                    Department
                   </label>
                   <input
                     type="text"
@@ -1123,9 +1164,9 @@ const handleJoiningSubmit = async (e) => {
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700"
                   />
                 </div>
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Equipment (उपकरण)
+                    Equipment
                   </label>
                   <input
                     type="text"
@@ -1134,14 +1175,14 @@ const handleJoiningSubmit = async (e) => {
                     onChange={handleJoiningInputChange}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
                   />
-                </div>
+                </div> */}
               </div>
 
               {/* Section 2: Contact Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mobile No. (मोबाइल नंबर)
+                    Mobile No.
                   </label>
                   <input
                     type="tel"
@@ -1152,7 +1193,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Personal Email (ईमेल)
+                    Personal Email
                   </label>
                   <input
                     type="email"
@@ -1163,7 +1204,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Family Mobile Number (परिवार का मोबाइल नंबर)
+                    Family Mobile Number
                   </label>
                   <input
                     name="familyMobileNo"
@@ -1174,7 +1215,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Relationship With Family (परिवार के साथ संबंध)
+                    Relationship With Family
                   </label>
                   <input
                     name="relationshipWithFamily"
@@ -1189,7 +1230,7 @@ const handleJoiningSubmit = async (e) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Current Address (वर्त्तमान पता)
+                    Current Address
                   </label>
                   <textarea
                     disabled
@@ -1204,7 +1245,7 @@ const handleJoiningSubmit = async (e) => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date Of Joining (शामिल होने की तारीख)
+                    Date Of Joining
                   </label>
                   <input
                     type="date"
@@ -1216,7 +1257,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Designation (पद का नाम)
+                    Designation
                   </label>
                   <input
                     type="text"
@@ -1227,7 +1268,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Highest Qualification (उच्चतम योग्यता)
+                    Highest Qualification
                   </label>
                   <input
                     name="highestQualification"
@@ -1242,7 +1283,7 @@ const handleJoiningSubmit = async (e) => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Aadhar Card Number (आधार कार्ड नंबर)
+                    Aadhar Card Number
                   </label>
                   <input
                     disabled
@@ -1252,7 +1293,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Current Bank Account No (बैंक खाता संख्या)
+                    Current Bank Account No
                   </label>
                   <input
                     name="currentBankAc"
@@ -1263,7 +1304,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    IFSC Code (आईएफएससी कोड)
+                    IFSC Code
                   </label>
                   <input
                     name="ifscCode"
@@ -1274,7 +1315,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Branch Name (शाखा का नाम)
+                    Branch Name
                   </label>
                   <input
                     name="branchName"
@@ -1289,7 +1330,7 @@ const handleJoiningSubmit = async (e) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Aadhar Card (आधार कार्ड)
+                    Aadhar Card
                   </label>
                   <div className="flex items-center space-x-2">
                     <input
@@ -1304,7 +1345,7 @@ const handleJoiningSubmit = async (e) => {
                       className="flex items-center px-4 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 text-gray-700"
                     >
                       <Upload size={16} className="mr-2" />
-                      Upload Photo (फोटो अपलोड करें)
+                      Upload Photo
                     </label>
                     {joiningFormData.aadharFrontPhoto && (
                       <span className="text-sm text-gray-700">
@@ -1315,7 +1356,7 @@ const handleJoiningSubmit = async (e) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Photo Of Front Bank Passbook (बैंक पासबुक की फ़ोटो)
+                    Photo Of Front Bank Passbook
                   </label>
                   <div className="flex items-center space-x-2">
                     <input
@@ -1352,9 +1393,8 @@ const handleJoiningSubmit = async (e) => {
                 </button>
                 <button
                   type="submit"
-                  className={`px-4 py-2 text-white bg-indigo-700 rounded-md hover:bg-indigo-800 flex items-center justify-center min-h-[42px] ${
-                    submitting ? "opacity-90 cursor-not-allowed" : ""
-                  }`}
+                  className={`px-4 py-2 text-white bg-indigo-700 rounded-md hover:bg-indigo-800 flex items-center justify-center min-h-[42px] ${submitting ? "opacity-90 cursor-not-allowed" : ""
+                    }`}
                   disabled={submitting}
                 >
                   {submitting ? (
@@ -1392,142 +1432,141 @@ const handleJoiningSubmit = async (e) => {
       )}
 
       {showShareModal && selectedItem && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-      <div className="flex justify-between items-center p-6 border-b border-gray-300">
-        <h3 className="text-lg font-medium text-gray-900">
-          Share Candidate Details
-        </h3>
-        <button
-          onClick={() => setShowShareModal(false)}
-          className="text-gray-500 hover:text-gray-700"
-        >
-          <X size={20} />
-        </button>
-      </div>
-      <form onSubmit={handleShareSubmit} className="p-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Recipient Name *
-          </label>
-          <input
-            type="text"
-            name="recipientName"
-            value={shareFormData.recipientName}
-            onChange={handleShareInputChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
-            required
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email Address *
-          </label>
-          <input
-            type="email"
-            name="recipientEmail"
-            value={shareFormData.recipientEmail}
-            onChange={handleShareInputChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
-            required
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Subject *
-          </label>
-          <input
-            type="text"
-            name="subject"
-            value={shareFormData.subject}
-            onChange={handleShareInputChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
-            required
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Message *
-          </label>
-          <textarea
-            name="message"
-            value={shareFormData.message}
-            onChange={handleShareInputChange}
-            rows={5}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
-            required
-          />
-        </div>
-        
-        <div>
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Attached Links
-  </label>
-  <div className="text-sm text-gray-600 space-y-1">
-    <div className="flex items-center">
-      <a 
-        href="https://hr-fms-passary-joining-form.vercel.app/" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="text-indigo-600 hover:text-indigo-800"
-      >
-        Joining Form Link
-      </a>
-    </div>
-  </div>
-</div>
-        
-        <div className="flex justify-end space-x-2 pt-4">
-          <button
-            type="button"
-            onClick={() => setShowShareModal(false)}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className={`px-4 py-2 text-white bg-indigo-700 rounded-md hover:bg-indigo-800 flex items-center justify-center min-h-[42px] ${
-              submitting ? "opacity-90 cursor-not-allowed" : ""
-            }`}
-            disabled={submitting}
-          >
-            {submitting ? (
-              <>
-                <svg
-                  className="animate-spin h-4 w-4 text-white mr-2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+            <div className="flex justify-between items-center p-6 border-b border-gray-300">
+              <h3 className="text-lg font-medium text-gray-900">
+                Share Candidate Details
+              </h3>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleShareSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Recipient Name *
+                </label>
+                <input
+                  type="text"
+                  name="recipientName"
+                  value={shareFormData.recipientName}
+                  onChange={handleShareInputChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  name="recipientEmail"
+                  value={shareFormData.recipientEmail}
+                  onChange={handleShareInputChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Subject *
+                </label>
+                <input
+                  type="text"
+                  name="subject"
+                  value={shareFormData.subject}
+                  onChange={handleShareInputChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Message *
+                </label>
+                <textarea
+                  name="message"
+                  value={shareFormData.message}
+                  onChange={handleShareInputChange}
+                  rows={5}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Attached Links
+                </label>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <div className="flex items-center">
+                    <a
+                      href="https://hr-fms-passary-joining-form.vercel.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-indigo-600 hover:text-indigo-800"
+                    >
+                      Joining Form Link
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowShareModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Sending...
-              </>
-            ) : (
-              "Send Email"
-            )}
-          </button>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className={`px-4 py-2 text-white bg-indigo-700 rounded-md hover:bg-indigo-800 flex items-center justify-center min-h-[42px] ${submitting ? "opacity-90 cursor-not-allowed" : ""
+                    }`}
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <>
+                      <svg
+                        className="animate-spin h-4 w-4 text-white mr-2"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Sending...
+                    </>
+                  ) : (
+                    "Send Email"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </form>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 };

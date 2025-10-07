@@ -9,7 +9,7 @@ const CallTracker = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [followUpData, setFollowUpData] = useState([]);
 
-    const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     candidateSays: '',
     status: '',
@@ -21,193 +21,194 @@ const CallTracker = () => {
   const [historyData, setHistoryData] = useState([]);
   const [error, setError] = useState(null);
 
-const fetchEnquiryData = async () => {
-  setLoading(true);
-  setTableLoading(true);
-  setError(null);
+  const fetchEnquiryData = async () => {
+    setLoading(true);
+    setTableLoading(true);
+    setError(null);
 
-  try {
-    const [enquiryResponse, followUpResponse, indentResponse] = await Promise.all([
-      fetch(
-        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=ENQUIRY&action=fetch"
-      ),
-      fetch(
-        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Follow - Up&action=fetch"
-      ),
-      fetch(
-        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=INDENT&action=fetch"
-      ),
-    ]);
+    try {
+      const [enquiryResponse, followUpResponse, indentResponse] = await Promise.all([
+        fetch(
+          "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=ENQUIRY&action=fetch"
+        ),
+        fetch(
+          "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Follow - Up&action=fetch"
+        ),
+        fetch(
+          "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=INDENT&action=fetch"
+        ),
+      ]);
 
-    if (!enquiryResponse.ok || !followUpResponse.ok || !indentResponse.ok) {
-      throw new Error(`HTTP error!`);
+      if (!enquiryResponse.ok || !followUpResponse.ok || !indentResponse.ok) {
+        throw new Error(`HTTP error!`);
+      }
+
+      const [enquiryResult, followUpResult, indentResult] = await Promise.all([
+        enquiryResponse.json(),
+        followUpResponse.json(),
+        indentResponse.json(),
+      ]);
+
+      if (
+        !enquiryResult.success ||
+        !enquiryResult.data ||
+        enquiryResult.data.length < 7
+      ) {
+        throw new Error(
+          enquiryResult.error || "Not enough rows in enquiry sheet data"
+        );
+      }
+
+      // Process INDENT data to create a lookup map
+      let indentDepartmentMap = {};
+      if (indentResult.success && indentResult.data && indentResult.data.length >= 7) {
+        const indentHeaders = indentResult.data[5].map(h => h.trim());
+        const indentDataRows = indentResult.data.slice(6);
+
+        const getIndentIndex = (headerName) => indentHeaders.findIndex(h => h === headerName);
+
+        indentDataRows.forEach(row => {
+          const indentNo = row[getIndentIndex('Indent Number')];
+          const department = row[8]; // Column I (index 8)
+          if (indentNo) {
+            indentDepartmentMap[indentNo] = department || '';
+          }
+        });
+      }
+
+      // Process enquiry data
+      const enquiryHeaders = enquiryResult.data[5].map((h) => h.trim());
+      const enquiryDataFromRow7 = enquiryResult.data.slice(6);
+
+      const getIndex = (headerName) =>
+        enquiryHeaders.findIndex((h) => h === headerName);
+
+      const processedEnquiryData = enquiryDataFromRow7
+        .filter((row) => {
+          const plannedIndex = getIndex("Planned");
+          const actualIndex = getIndex("Actual");
+          const planned = row[plannedIndex];
+          const actual = row[actualIndex];
+          return planned && (!actual || actual === "");
+        })
+        .map((row) => {
+          const indentNo = row[getIndex("Indent Number")];
+          const departmentFromIndent = indentDepartmentMap[indentNo] || '';
+
+          return {
+            id: row[getIndex("Timestamp")],
+            indentNo: indentNo,
+            candidateEnquiryNo: row[getIndex("Candidate Enquiry Number")],
+            applyingForPost: row[getIndex("Applying For the Post")],
+            department: departmentFromIndent, // INDENT sheet se fetch kiya
+            candidateName: row[getIndex("Candidate Name")],
+            candidateDOB: row[getIndex("DOB")],
+            candidatePhone: row[getIndex("Candidate Phone Number")],
+            candidateEmail: row[getIndex("Candidate Email")],
+            previousCompany: row[getIndex("Previous Company Name")],
+            jobExperience: row[getIndex("Job Experience")] || "",
+            lastSalary: row[getIndex("Last Salary Drawn")] || "",
+            previousPosition: row[getIndex("Previous Position")] || "",
+            reasonForLeaving:
+              row[getIndex("Reason Of Leaving Previous Company")] || "",
+            maritalStatus: row[getIndex("Marital Status")] || "",
+            lastEmployerMobile: row[getIndex("Last Employer Mobile Number")] || "",
+            candidatePhoto: row[getIndex("Candidate Photo")] || "",
+            candidateResume: row[19] || "",
+            referenceBy: row[getIndex("Reference By")] || "",
+            presentAddress: row[getIndex("Present Address")] || "",
+            aadharNo: row[getIndex("Aadhar Number")] || "",
+            designation: row[getIndex("Applying For the Post")] || "",
+          };
+        });
+
+      setEnquiryData(processedEnquiryData);
+
+      // Process follow-up data
+      if (followUpResult.success && followUpResult.data) {
+        const rawFollowUpData = followUpResult.data || followUpResult;
+        const followUpRows = Array.isArray(rawFollowUpData[0])
+          ? rawFollowUpData.slice(1)
+          : rawFollowUpData;
+
+        const processedFollowUpData = followUpRows.map((row) => ({
+          enquiryNo: row[1] || "",
+          status: row[2] || "",
+        }));
+
+        setFollowUpData(processedFollowUpData);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError(error.message);
+      toast.error("Failed to fetch data");
+    } finally {
+      setLoading(false);
+      setTableLoading(false);
     }
+  };
 
-    const [enquiryResult, followUpResult, indentResult] = await Promise.all([
-      enquiryResponse.json(),
-      followUpResponse.json(),
-      indentResponse.json(),
-    ]);
+  const fetchFollowUpData = async () => {
+    setLoading(true);
+    setTableLoading(true);
+    setError(null);
 
-    if (
-      !enquiryResult.success ||
-      !enquiryResult.data ||
-      enquiryResult.data.length < 7
-    ) {
-      throw new Error(
-        enquiryResult.error || "Not enough rows in enquiry sheet data"
+    try {
+      const response = await fetch(
+        'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Follow - Up&action=fetch'
       );
-    }
 
-    // Process INDENT data to create a lookup map
-    let indentDepartmentMap = {};
-    if (indentResult.success && indentResult.data && indentResult.data.length >= 7) {
-      const indentHeaders = indentResult.data[5].map(h => h.trim());
-      const indentDataRows = indentResult.data.slice(6);
-      
-      const getIndentIndex = (headerName) => indentHeaders.findIndex(h => h === headerName);
-      
-      indentDataRows.forEach(row => {
-        const indentNo = row[getIndentIndex('Indent Number')];
-        const department = row[8]; // Column I (index 8)
-        if (indentNo) {
-          indentDepartmentMap[indentNo] = department || '';
-        }
-      });
-    }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    // Process enquiry data
-    const enquiryHeaders = enquiryResult.data[5].map((h) => h.trim());
-    const enquiryDataFromRow7 = enquiryResult.data.slice(6);
+      const result = await response.json();
+      console.log('Raw API response:', result);
 
-    const getIndex = (headerName) =>
-      enquiryHeaders.findIndex((h) => h === headerName);
+      if (!result.success) {
+        throw new Error(result.error || 'Google Script returned an error');
+      }
 
-    const processedEnquiryData = enquiryDataFromRow7
-      .filter((row) => {
-        const plannedIndex = getIndex("Planned");
-        const actualIndex = getIndex("Actual");
-        const planned = row[plannedIndex];
-        const actual = row[actualIndex];
-        return planned && (!actual || actual === "");
-      })
-      .map((row) => {
-        const indentNo = row[getIndex("Indent Number")];
-        const departmentFromIndent = indentDepartmentMap[indentNo] || '';
-        
-        return {
-          id: row[getIndex("Timestamp")],
-          indentNo: indentNo,
-          candidateEnquiryNo: row[getIndex("Candidate Enquiry Number")],
-          applyingForPost: row[getIndex("Applying For the Post")],
-          department: departmentFromIndent, // INDENT sheet se fetch kiya
-          candidateName: row[getIndex("Candidate Name")],
-          candidateDOB: row[getIndex("DOB")],
-          candidatePhone: row[getIndex("Candidate Phone Number")],
-          candidateEmail: row[getIndex("Candidate Email")],
-          previousCompany: row[getIndex("Previous Company Name")],
-          jobExperience: row[getIndex("Job Experience")] || "",
-          lastSalary: row[getIndex("Last Salary Drawn")] || "",
-          previousPosition: row[getIndex("Previous Position")] || "",
-          reasonForLeaving:
-            row[getIndex("Reason Of Leaving Previous Company")] || "",
-          maritalStatus: row[getIndex("Marital Status")] || "",
-          lastEmployerMobile: row[getIndex("Last Employer Mobile Number")] || "",
-          candidatePhoto: row[getIndex("Candidate Photo")] || "",
-          candidateResume: row[19] || "",
-          referenceBy: row[getIndex("Reference By")] || "",
-          presentAddress: row[getIndex("Present Address")] || "",
-          aadharNo: row[getIndex("Aadhar Number")] || "",
-          designation: row[getIndex("Applying For the Post")] || "",
-        };
-      });
+      // Handle both array formats (direct data or result.data)
+      const rawData = result.data || result;
 
-    setEnquiryData(processedEnquiryData);
+      if (!Array.isArray(rawData)) {
+        throw new Error('Expected array data not received');
+      }
 
-    // Process follow-up data
-    if (followUpResult.success && followUpResult.data) {
-      const rawFollowUpData = followUpResult.data || followUpResult;
-      const followUpRows = Array.isArray(rawFollowUpData[0])
-        ? rawFollowUpData.slice(1)
-        : rawFollowUpData;
+      // Process data - skip header row if present
+      const dataRows = rawData.length > 0 && Array.isArray(rawData[0]) ? rawData.slice(1) : rawData;
 
-      const processedFollowUpData = followUpRows.map((row) => ({
-        enquiryNo: row[1] || "",
-        status: row[2] || "",
+      const processedData = dataRows.map(row => ({
+        timestamp: row[0] || '',       // Column A - Timestamp
+        indentNo: row[1] || '',        // Column B - Indent No (NEW)
+        enquiryNo: row[2] || '',       // Column C - Enquiry No
+        status: row[3] || '',          // Column D - Status
+        candidateSays: row[4] || '',   // Column E - Candidates Says
+        nextDate: row[5] || ''         // Column F - Next Date
       }));
 
-      setFollowUpData(processedFollowUpData);
+      console.log('Processed follow-up data:', processedData);
+      setHistoryData(processedData);
+
+    } catch (error) {
+      console.error('Error in fetchFollowUpData:', error);
+      setError(error.message);
+      toast.error(`Failed to load follow-ups: ${error.message}`);
+    } finally {
+      setLoading(false);
+      setTableLoading(false);
     }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    setError(error.message);
-    toast.error("Failed to fetch data");
-  } finally {
-    setLoading(false);
-    setTableLoading(false);
-  }
-};
-
-const fetchFollowUpData = async () => {
-  setLoading(true);
-  setTableLoading(true);
-  setError(null);
-
-  try {
-    const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=Follow - Up&action=fetch'
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log('Raw API response:', result);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Google Script returned an error');
-    }
-
-    // Handle both array formats (direct data or result.data)
-    const rawData = result.data || result;
-    
-    if (!Array.isArray(rawData)) {
-      throw new Error('Expected array data not received');
-    }
-
-    // Process data - skip header row if present
-    const dataRows = rawData.length > 0 && Array.isArray(rawData[0]) ? rawData.slice(1) : rawData;
-    
-    const processedData = dataRows.map(row => ({
-      timestamp: row[0] || '',       // Column A (index 0) - Timestamp
-      enquiryNo: row[1] || '',       // Column B (index 1) - Enquiry No
-      status: row[2] || '',          // Column C (index 2) - Status
-      candidateSays: row[3] || '',   // Column D (index 3) - Candidates Says
-      nextDate: row[4] || ''         // Column E (index 4) - Next Date
-    }));
-
-    console.log('Processed follow-up data:', processedData);
-    setHistoryData(processedData);
-    
-  } catch (error) {
-    console.error('Error in fetchFollowUpData:', error);
-    setError(error.message);
-    toast.error(`Failed to load follow-ups: ${error.message}`);
-  } finally {
-    setLoading(false);
-    setTableLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     fetchEnquiryData();
     fetchFollowUpData();
   }, []);
 
- const pendingData = enquiryData.filter(item => {
-    const hasFinalStatus = followUpData.some(followUp => 
-      followUp.enquiryNo === item.candidateEnquiryNo && 
+  const pendingData = enquiryData.filter(item => {
+    const hasFinalStatus = followUpData.some(followUp =>
+      followUp.enquiryNo === item.candidateEnquiryNo &&
       (followUp.status === 'Joining' || followUp.status === 'Reject')
     );
     return !hasFinalStatus;
@@ -232,258 +233,261 @@ const fetchFollowUpData = async () => {
   };
 
 
-const postToSheet = async (rowData) => {
-  const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
+  const postToSheet = async (rowData) => {
+    const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
 
-  try {
-    console.log('Attempting to post:', {
-      sheetName: 'Follow - Up',
-      rowData: rowData
-    });
-
-    const params = new URLSearchParams();
-    params.append('sheetName', 'Follow - Up');
-    params.append('action', 'insert');
-    params.append('rowData', JSON.stringify(rowData));
-
-    const response = await fetch(URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('Server response:', data);
-
-    if (!data.success) {
-      throw new Error(data.error || 'Server returned unsuccessful response');
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Full error details:', {
-      error: error.message,
-      stack: error.stack,
-      rowData: rowData,
-      timestamp: new Date().toISOString()
-    });
-    throw new Error(`Failed to update sheet: ${error.message}`);
-  }
-};
-
-const updateEnquirySheet = async (enquiryNo) => {
-  const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
-
-  try {
-    console.log('Attempting to update ENQUIRY sheet for:', enquiryNo);
-
-    // First, fetch the ENQUIRY sheet data to find the correct row
-    const fetchResponse = await fetch(
-      `${URL}?sheet=ENQUIRY&action=fetch`
-    );
-
-    if (!fetchResponse.ok) {
-      throw new Error(`HTTP error! status: ${fetchResponse.status}`);
-    }
-
-    const fetchResult = await fetchResponse.json();
-    
-    if (!fetchResult.success || !fetchResult.data) {
-      throw new Error('Failed to fetch ENQUIRY sheet data');
-    }
-
-    // Find the row with matching enquiry number (Column C is index 2)
-    let targetRowIndex = -1;
-    const sheetData = fetchResult.data;
-    
-    for (let i = 0; i < sheetData.length; i++) {
-      if (sheetData[i][2] === enquiryNo) { // Column C (index 2)
-        targetRowIndex = i + 1; // Convert to 1-based index for Google Sheets
-        break;
-      }
-    }
-
-    if (targetRowIndex === -1) {
-      throw new Error(`Enquiry number ${enquiryNo} not found in ENQUIRY sheet`);
-    }
-
-    console.log(`Found enquiry ${enquiryNo} at row ${targetRowIndex}`);
-
-    // Format current date and time as 9/21/2020 14:21:19
-    const now = new Date();
-    const month = now.getMonth() + 1; // getMonth() returns 0-11
-    const day = now.getDate();
-    const year = now.getFullYear();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
-    
-    const formattedDateTime = `${month}/${day}/${year} ${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-    // Now update the specific cell using updateCell action
-    const params = new URLSearchParams();
-    params.append('sheetName', 'ENQUIRY');
-    params.append('action', 'updateCell');
-    params.append('rowIndex', targetRowIndex.toString());
-    params.append('columnIndex', '27'); // Column AA is index 27 (1-based)
-    params.append('value', formattedDateTime);
-
-    const response = await fetch(URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('ENQUIRY sheet update response:', data);
-
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to update ENQUIRY sheet');
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error updating ENQUIRY sheet:', {
-      error: error.message,
-      stack: error.stack,
-      enquiryNo: enquiryNo,
-      timestamp: new Date().toISOString()
-    });
-    throw new Error(`Failed to update ENQUIRY sheet: ${error.message}`);
-  }
-};
-
-// utils/dateFormatter.js
- const formatDateTime=(isoString)=>{
-  const d = new Date(isoString);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  return `${day}/${month}/${year} ${hours}:${minutes}`;
-}
-
-const formatDOB = (dateString) => {
-  if (!dateString) return '';
-  
-  // Handle different date formats that might come from the input
-  let date;
-  
-  // If it's already a Date object
-  if (dateString instanceof Date) {
-    date = dateString;
-  } 
-  // If it's in the format "1/11/2021" (mm/dd/yyyy or dd/mm/yyyy)
-  else if (typeof dateString === 'string' && dateString.includes('/')) {
-    const parts = dateString.split('/');
-    if (parts.length === 3) {
-      if (parseInt(parts[0]) > 12) {
-        date = new Date(parts[2], parts[1] - 1, parts[0]);
-      } else {
-        date = new Date(parts[2], parts[0] - 1, parts[1]);
-      }
-    }
-  } 
-  else {
-    date = new Date(dateString);
-  }
-  
-  if (isNaN(date.getTime())) {
-    return dateString;
-  }
-  
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  
-  return `${day}/${month}/${year}`;
-};
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setSubmitting(true);
-
-  if (!formData.candidateSays || !formData.status) {
-    toast.error('Please fill all required fields');
-    setSubmitting(false);
-    return;
-  }
-
-  try {
-    // For ALL statuses including Joining, submit to Follow-Up sheet first
-    // const now = new Date();
-    // const formattedTimestamp = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
-
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = now.getFullYear();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    const formattedTimestamp = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-
-    const rowData = [
-      formattedTimestamp,
-      selectedItem.candidateEnquiryNo || '',
-      formData.status,
-      formData.candidateSays,
-      formatDOB(formData.nextDate) || '',
-    ];
-
-    await postToSheet(rowData);
-
-    // If status is "Joining", also update the ENQUIRY sheet
-    if (formData.status === 'Joining') {
-      await updateEnquirySheet(selectedItem.candidateEnquiryNo);
-    }
-
-    toast.success('Update successful!');
-    setShowModal(false);
-    fetchEnquiryData();
-    fetchFollowUpData();
-
-  } catch (error) {
-    console.error('Submission failed:', error);
-    toast.error(`Failed to update: ${error.message}`);
-    if (error.message.includes('appendRow')) {
-      toast('Please verify the "Follow-Up" sheet exists', {
-        icon: 'ℹ️',
-        duration: 8000
+    try {
+      console.log('Attempting to post:', {
+        sheetName: 'Follow - Up',
+        rowData: rowData
       });
+
+      const params = new URLSearchParams();
+      params.append('sheetName', 'Follow - Up');
+      params.append('action', 'insert');
+      params.append('rowData', JSON.stringify(rowData));
+
+      const response = await fetch(URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('Server response:', data);
+
+      if (!data.success) {
+        throw new Error(data.error || 'Server returned unsuccessful response');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Full error details:', {
+        error: error.message,
+        stack: error.stack,
+        rowData: rowData,
+        timestamp: new Date().toISOString()
+      });
+      throw new Error(`Failed to update sheet: ${error.message}`);
     }
-  } finally {
-    setSubmitting(false);
+  };
+
+  const updateEnquirySheet = async (enquiryNo) => {
+    const URL = 'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec';
+
+    try {
+      console.log('Attempting to update ENQUIRY sheet for:', enquiryNo);
+
+      // First, fetch the ENQUIRY sheet data to find the correct row
+      const fetchResponse = await fetch(
+        `${URL}?sheet=ENQUIRY&action=fetch`
+      );
+
+      if (!fetchResponse.ok) {
+        throw new Error(`HTTP error! status: ${fetchResponse.status}`);
+      }
+
+      const fetchResult = await fetchResponse.json();
+
+      if (!fetchResult.success || !fetchResult.data) {
+        throw new Error('Failed to fetch ENQUIRY sheet data');
+      }
+
+      // Find the row with matching enquiry number (Column C is index 2)
+      let targetRowIndex = -1;
+      const sheetData = fetchResult.data;
+
+      for (let i = 0; i < sheetData.length; i++) {
+        if (sheetData[i][2] === enquiryNo) { // Column C (index 2)
+          targetRowIndex = i + 1; // Convert to 1-based index for Google Sheets
+          break;
+        }
+      }
+
+      if (targetRowIndex === -1) {
+        throw new Error(`Enquiry number ${enquiryNo} not found in ENQUIRY sheet`);
+      }
+
+      console.log(`Found enquiry ${enquiryNo} at row ${targetRowIndex}`);
+
+      // Format current date and time as 9/21/2020 14:21:19
+      const now = new Date();
+      const month = now.getMonth() + 1; // getMonth() returns 0-11
+      const day = now.getDate();
+      const year = now.getFullYear();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+
+      // const formattedDateTime = `${month}/${day}/${year} ${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+      // Now update the specific cell using updateCell action
+      const params = new URLSearchParams();
+      params.append('sheetName', 'ENQUIRY');
+      params.append('action', 'updateCell');
+      params.append('rowIndex', targetRowIndex.toString());
+      params.append('columnIndex', '27'); // Column AA is index 27 (1-based)
+      // params.append('value', formattedDateTime);
+
+      const response = await fetch(URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('ENQUIRY sheet update response:', data);
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to update ENQUIRY sheet');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error updating ENQUIRY sheet:', {
+        error: error.message,
+        stack: error.stack,
+        enquiryNo: enquiryNo,
+        timestamp: new Date().toISOString()
+      });
+      throw new Error(`Failed to update ENQUIRY sheet: ${error.message}`);
+    }
+  };
+
+  // utils/dateFormatter.js
+  const formatDateTime = (isoString) => {
+    const d = new Date(isoString);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
   }
-};
+
+  const formatDOB = (dateString) => {
+    if (!dateString) return '';
+
+    // Handle different date formats that might come from the input
+    let date;
+
+    // If it's already a Date object
+    if (dateString instanceof Date) {
+      date = dateString;
+    }
+    // If it's in the format "1/11/2021" (mm/dd/yyyy or dd/mm/yyyy)
+    else if (typeof dateString === 'string' && dateString.includes('/')) {
+      const parts = dateString.split('/');
+      if (parts.length === 3) {
+        if (parseInt(parts[0]) > 12) {
+          date = new Date(parts[2], parts[1] - 1, parts[0]);
+        } else {
+          date = new Date(parts[2], parts[0] - 1, parts[1]);
+        }
+      }
+    }
+    else {
+      date = new Date(dateString);
+    }
+
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    if (!formData.candidateSays || !formData.status) {
+      toast.error('Please fill all required fields');
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      // For ALL statuses including Joining, submit to Follow-Up sheet first
+      // const now = new Date();
+      // const formattedTimestamp = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
+
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      const formattedTimestamp = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+
+      const rowData = [
+        formattedTimestamp,
+        selectedItem.indentNo || '',
+
+        selectedItem.candidateEnquiryNo || '',
+        
+        formData.status,
+        formData.candidateSays,
+        formatDOB(formData.nextDate) || '',
+      ];
+
+      await postToSheet(rowData);
+
+      // If status is "Joining", also update the ENQUIRY sheet
+      if (formData.status === 'Joining') {
+        await updateEnquirySheet(selectedItem.candidateEnquiryNo);
+      }
+
+      toast.success('Update successful!');
+      setShowModal(false);
+      fetchEnquiryData();
+      fetchFollowUpData();
+
+    } catch (error) {
+      console.error('Submission failed:', error);
+      toast.error(`Failed to update: ${error.message}`);
+      if (error.message.includes('appendRow')) {
+        toast('Please verify the "Follow-Up" sheet exists', {
+          icon: 'ℹ️',
+          duration: 8000
+        });
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const filteredPendingData = pendingData.filter(item => {
     const matchesSearch = item.candidateName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       item.candidateEnquiryNo?.toLowerCase().includes(searchTerm.toLowerCase());
+      item.candidateEnquiryNo?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
   const filteredHistoryData = historyData.filter(item => {
-  const matchesSearch = item.enquiryNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                     item.candidateSays?.toLowerCase().includes(searchTerm.toLowerCase());
-  return matchesSearch;
-});
+    const matchesSearch = item.enquiryNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.candidateSays?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
 
   return (
     <div className="space-y-6">
@@ -515,22 +519,20 @@ const handleSubmit = async (e) => {
         <div className="border-b border-gray-300 border-opacity-20">
           <nav className="flex -mb-px">
             <button
-              className={`py-4 px-6 font-medium text-sm border-b-2 ${
-                activeTab === "pending"
+              className={`py-4 px-6 font-medium text-sm border-b-2 ${activeTab === "pending"
                   ? "border-indigo-500 text-indigo-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+                }`}
               onClick={() => setActiveTab("pending")}
             >
               <Clock size={16} className="inline mr-2" />
               Pending ({filteredPendingData.length})
             </button>
             <button
-              className={`py-4 px-6 font-medium text-sm border-b-2 ${
-                activeTab === "history"
+              className={`py-4 px-6 font-medium text-sm border-b-2 ${activeTab === "history"
                   ? "border-indigo-500 text-indigo-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+                }`}
               onClick={() => setActiveTab("history")}
             >
               <CheckCircle size={16} className="inline mr-2" />
@@ -682,6 +684,9 @@ const handleSubmit = async (e) => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Indent No
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Enquiry No
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -720,17 +725,19 @@ const handleSubmit = async (e) => {
                     filteredHistoryData.map((item, index) => (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {item.indentNo}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {item.enquiryNo}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <span
-                            className={`px-2 py-1 text-xs rounded-full ${
-                              item.status === "Joining"
+                            className={`px-2 py-1 text-xs rounded-full ${item.status === "Joining"
                                 ? "bg-green-100 text-green-800"
                                 : item.status === "Reject"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-blue-100 text-blue-800"
-                            }`}
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-blue-100 text-blue-800"
+                              }`}
                           >
                             {item.status}
                           </span>
@@ -772,7 +779,7 @@ const handleSubmit = async (e) => {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Candidate Enquiry No. ((उम्मीदवार इन्क्वायरी संख्या))
+                  Candidate Enquiry No.
                 </label>
                 <input
                   type="text"
@@ -783,7 +790,18 @@ const handleSubmit = async (e) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status (स्थिति) *
+                  Indent No.
+                </label>
+                <input
+                  type="text"
+                  value={selectedItem.indentNo}
+                  disabled
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-700"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status*
                 </label>
                 <select
                   name="status"
@@ -792,13 +810,13 @@ const handleSubmit = async (e) => {
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700"
                   required
                 >
-                  <option value="">Select Status (स्थिति चुनें)</option>
+                  <option value="">Select Status </option>
                   <option value="Follow-up">Follow-up </option>
-                  <option value="Interview">Interview (साक्षात्कार) </option>
-                  <option value="Negotiation">Negotiation (बातचीत) </option>
-                  <option value="On Hold">On Hold (होल्ड पर) </option>
-                  <option value="Joining">Joining (भर्ती)</option>
-                  <option value="Reject">Reject (अस्वीकार)</option>
+                  <option value="Interview">Interview </option>
+                  <option value="Negotiation">Negotiation </option>
+                  <option value="On Hold">On Hold </option>
+                  <option value="Joining">Joining </option>
+                  <option value="Reject">Reject </option>
                 </select>
               </div>
 
@@ -808,12 +826,12 @@ const handleSubmit = async (e) => {
                   {formData.status === "Negotiation"
                     ? "What's Customer Requirement * ()"
                     : formData.status === "On Hold"
-                    ? "Reason For Holding the Candidate *"
-                    : formData.status === "Joining"
-                    ? "When the candidate will join the company *"
-                    : formData.status === "Reject"
-                    ? "Reason for Rejecting the Candidate *"
-                    : "What Did The Candidate Says *"}
+                      ? "Reason For Holding the Candidate *"
+                      : formData.status === "Joining"
+                        ? "When the candidate will join the company *"
+                        : formData.status === "Reject"
+                          ? "Reason for Rejecting the Candidate *"
+                          : "What Did The Candidate Says *"}
                 </label>
                 <textarea
                   name="candidateSays"
@@ -831,10 +849,10 @@ const handleSubmit = async (e) => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {formData.status === "Interview"
-                        ? "Schedule Date (निर्धारित तिथि) *"
+                        ? "Schedule Date *"
                         : formData.status === "On Hold"
-                        ? "ReCalling Date (वापसी की तिथि) *"
-                        : "Next Date (अगली तारीख) *"}
+                          ? "ReCalling Date *"
+                          : "Next Date *"}
                     </label>
                     <input
                       type="date"
@@ -857,9 +875,8 @@ const handleSubmit = async (e) => {
                 </button>
                 <button
                   type="submit"
-                  className={`px-4 py-2 text-white bg-indigo-700 rounded-md hover:bg-indigo-800 min-h-[42px] flex items-center justify-center ${
-                    submitting ? "opacity-90 cursor-not-allowed" : ""
-                  }`}
+                  className={`px-4 py-2 text-white bg-indigo-700 rounded-md hover:bg-indigo-800 min-h-[42px] flex items-center justify-center ${submitting ? "opacity-90 cursor-not-allowed" : ""
+                    }`}
                   disabled={submitting}
                 >
                   {submitting ? (

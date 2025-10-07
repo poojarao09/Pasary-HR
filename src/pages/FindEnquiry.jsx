@@ -28,6 +28,7 @@ const FindEnquiry = () => {
     department: '', // Add this line
     previousPosition: '',
     maritalStatus: '',
+    interviewDate: '',
     candidatePhoto: null,
     candidateResume: null,
     presentAddress: '',
@@ -36,7 +37,7 @@ const FindEnquiry = () => {
   });
 
   // Google Drive folder ID for file uploads
-  const GOOGLE_DRIVE_FOLDER_ID = '1COOxrSMehfELEGDcSsNSuDxtJm5dHNJ-';
+  const GOOGLE_DRIVE_FOLDER_ID = '1O0D_zo4dr9qYLq6GKS2jubR5WUXhV0lB';
 
   // Fetch all necessary data
   const fetchAllData = async () => {
@@ -109,7 +110,7 @@ const FindEnquiry = () => {
 
         console.log('Processed Data after filter:', processedData);
 
-       
+
         // Fetch ENQUIRY data
         const enquiryResponse = await fetch(
           'https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=ENQUIRY&action=fetch'
@@ -154,7 +155,8 @@ const FindEnquiry = () => {
               candidateResume: row[19] || '',
               referenceBy: row[getEnquiryIndex('Reference By')] || '',
               presentAddress: row[getEnquiryIndex('Present Address')] || '',
-              aadharNo: row[getEnquiryIndex('Aadhar No')] || ''
+              aadharNo: row[getEnquiryIndex('Aadhar No')] || '',
+              interviewDate: row[20] || ''
             }));
 
           setEnquiryData(processedEnquiryData);
@@ -341,6 +343,7 @@ const FindEnquiry = () => {
       reasonForLeaving: '',
       maritalStatus: '',
       lastEmployerMobile: '',
+      interviewDate: '',
       candidatePhoto: null,
       candidateResume: null,
       referenceBy: '',
@@ -364,6 +367,23 @@ const FindEnquiry = () => {
     const year = date.getFullYear().toString().slice(-2);
 
     return `${day}-${month}-${year}`;
+  };
+
+
+
+  const formatInterviewDate = (dateString) => {
+    if (!dateString) return '-';
+
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString; // Return as-is if not a valid date
+    }
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear().toString().slice(-2);
+
+    return `${day}/${month}/${year}`;
   };
 
   const handleSubmit = async (e) => {
@@ -422,6 +442,7 @@ const FindEnquiry = () => {
         formData.presentAddress || '',                // Column R: Present Address
         formData.aadharNo || '',                      // Column S: Aadhar No
         resumeUrl,                                    // Column T: Candidate Resume (URL)
+        formData.interviewDate || '',               // Column U: Interview Date
       ];
 
       console.log('Submitting to ENQUIRY sheet:', rowData);
@@ -644,8 +665,8 @@ const FindEnquiry = () => {
           <nav className="flex -mb-px">
             <button
               className={`py-4 px-6 font-medium text-sm border-b-2 ${activeTab === "pending"
-                  ? "border-indigo-500 text-indigo-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                ? "border-indigo-500 text-indigo-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               onClick={() => setActiveTab("pending")}
             >
@@ -654,8 +675,8 @@ const FindEnquiry = () => {
             </button>
             <button
               className={`py-4 px-6 font-medium text-sm border-b-2 ${activeTab === "history"
-                  ? "border-indigo-500 text-indigo-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                ? "border-indigo-500 text-indigo-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               onClick={() => setActiveTab("history")}
             >
@@ -792,6 +813,9 @@ const FindEnquiry = () => {
                       Experience
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Interview Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Photo
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -847,6 +871,9 @@ const FindEnquiry = () => {
                           {item.jobExperience}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatInterviewDate(item.interviewDate)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {item.candidatePhoto ? (
                             <a
                               href={item.candidatePhoto}
@@ -897,7 +924,7 @@ const FindEnquiry = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Indent No. (इंडेंट नंबर)
+                    Indent No.
                   </label>
                   <input
                     type="text"
@@ -908,7 +935,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Candidate Enquiry No. (उम्मीदवार इन्क्वायरी संख्या)
+                    Candidate Enquiry No.
                   </label>
                   <input
                     type="text"
@@ -919,7 +946,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Applying For Post (पद के लिए आवेदन)
+                    Applying For Post
                   </label>
                   <input
                     type="text"
@@ -935,7 +962,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Department (विभाग)
+                    Department
                   </label>
                   <input
                     type="text"
@@ -947,7 +974,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Candidate Name (उम्मीदवार का नाम) *
+                    Candidate Name*
                   </label>
                   <input
                     type="text"
@@ -960,7 +987,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Candidate DOB (उम्मीदवार की जन्मतिथि)
+                    Candidate DOB
                   </label>
                   <input
                     type="date"
@@ -972,7 +999,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Candidate Phone (उम्मीदवार का फ़ोन) *
+                    Candidate Phone*
                   </label>
                   <input
                     type="tel"
@@ -985,7 +1012,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Candidate Email (उम्मीदवार ईमेल)
+                    Candidate Email
                   </label>
                   <input
                     type="email"
@@ -997,7 +1024,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Previous Company (पिछली कंपनी)
+                    Previous Company
                   </label>
                   <input
                     type="text"
@@ -1009,7 +1036,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Job Experience (काम का अनुभव)
+                    Job Experience
                   </label>
                   <input
                     type="text"
@@ -1021,7 +1048,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Previous Position (पिछला पद)
+                    Previous Position
                   </label>
                   <input
                     type="text"
@@ -1033,7 +1060,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Marital Status (वैवाहिक स्थिति)
+                    Marital Status
                   </label>
                   <select
                     name="maritalStatus"
@@ -1049,7 +1076,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Aadhar No. (आधार नं) *
+                    Aadhar No.*
                   </label>
                   <input
                     type="text"
@@ -1064,7 +1091,7 @@ const FindEnquiry = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-500 mb-1">
-                  Current Address (वर्त्तमान पता)
+                  Current Address 
                 </label>
                 <textarea
                   name="presentAddress"
@@ -1078,7 +1105,7 @@ const FindEnquiry = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Candidate Photo (उम्मीदवार फोटो)
+                    Candidate Photo 
                   </label>
                   <div className="flex items-center space-x-2">
                     <input
@@ -1115,7 +1142,7 @@ const FindEnquiry = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Candidate Resume (उम्मीदवार का बायोडाटा)
+                    Candidate Resume
                   </label>
                   <div className="flex items-center space-x-2">
                     <input
@@ -1151,10 +1178,26 @@ const FindEnquiry = () => {
                   </p>
                 </div>
               </div>
+
+
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Status (स्थिति) *
+                    Interview Date
+                  </label>
+                  <input
+                    type="date"
+                    name="interviewDate"
+                    value={formData.interviewDate}
+                    onChange={handleInputChange}
+                    className="w-full border border-gray-300 border-opacity-30 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white bg-white bg-opacity-10 text-gray-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">
+                    Status*
                   </label>
                   <select
                     name="status"
