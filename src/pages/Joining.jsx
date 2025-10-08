@@ -842,9 +842,9 @@ const Joining = () => {
     rowData[20] = selectedItem.department || '';  // Column U: Department
     rowData[21] = selectedItem.aadharNo;       // Column W: Aadhar Number
     rowData[22] = selectedItem.candidateResume; // Column X: Candidate Resume
-    rowData[23] = "";
-    rowData[24] = "";
-    rowData[25] = selectedItem.actualDate || formattedTimestamp; // Column AA: Actual Date
+    // rowData[23] = "";
+    // rowData[24] = "";
+    rowData[23] = selectedItem.actualDate || formattedTimestamp; // Column AA: Actual Date
 
     await postToJoiningSheet(rowData);
 

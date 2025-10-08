@@ -28,7 +28,12 @@ import MisReport from './pages/MisReport';
 import Joining from './pages/Joining';
 import GatePass from './pages/GatePass';
 import GatePassRequest from './pages/GatePassRequest';
-
+import HodVerification from './pages/HodVerification';
+import ReportingManager from './pages/AfterLeavingWork/ReportingManager';
+import ItDepartment from './pages/AfterLeavingWork/ItDepartment';
+import AdminDepartment from './pages/AfterLeavingWork/AdminDepartment';
+import AccountDepartment from './pages/AfterLeavingWork/AccountDepartment';   
+import Store from './pages/AfterLeavingWork/StoreDepartment';
 function App() {
   return (
     <div className="gradient-bg min-h-screen">
@@ -66,6 +71,13 @@ function App() {
               <Route path="report" element={<Report />} />
               <Route path="payroll" element={<Payroll />} />
               <Route path="misreport" element={<MisReport />} />
+              <Route path="reporting-manager" element={<ReportingManager />} />
+              <Route path="it-department" element={<ItDepartment />} />
+              <Route path="admin-department" element={<AdminDepartment />} />
+              <Route path="account-department" element={<AccountDepartment />} />
+              <Route path="store-department" element={<Store />} />
+              
+              <Route path="hod-verification" element={<HodVerification />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

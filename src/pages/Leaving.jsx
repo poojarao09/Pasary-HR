@@ -1,3 +1,7 @@
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { Filter, Search, Clock, CheckCircle, X } from 'lucide-react';
 import useDataStore from '../store/dataStore';
@@ -14,11 +18,13 @@ const Leaving = () => {
   const [tableLoading, setTableLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [formData, setFormData] = useState({
-    dateOfLeaving: '',
-    mobileNumber: '',
-    reasonOfLeaving: ''
-  });
+const [formData, setFormData] = useState({
+  dateOfLeaving: '',
+  mobileNumber: '',
+  reasonOfLeaving: '',
+  typeOfLeave: '',
+  lastWorkingDate: ''
+});
 
 const fetchJoiningData = async () => {
   setLoading(true);
@@ -58,6 +64,7 @@ const fetchJoiningData = async () => {
 
     const processedData = dataRows.map((row, index) => ({
       rowIndex: index + 7, // Actual row number in sheet (starting from row 7)
+      employeeCode: row[getIndex('Employee Code')] || row[0] || '',
       employeeNo: row[getIndex('SKA-Joining ID')] || row[1] || '', // Column B (index 1)
       candidateName: row[getIndex('Name As Per Aadhar')] || row[2] || '', // Column C (index 2)
       fatherName: row[getIndex('Father Name')] || row[3] || '', // Column D (index 3)
@@ -72,12 +79,13 @@ const fetchJoiningData = async () => {
       // Get values from specific column indices
       leavingDate: row[24] || '', // Column Y (index 24)
       reason: row[25] || '', // Column Z (index 25)
-      columnAB: row[27] || '', // Column AB (index 27)
+      columnAZ: row[51] || '', // Column AZ (index 51) - AZ is the 52nd column (0-based index 51)
+      columnBA: row[52] || '', // Column BA (index 52) - BA is the 53rd column (0-based index 52)
     }));
 
-    // Filter for employees with non-null value in AQ and null value in AO
+    // Filter for employees with non-null value in AZ and null value in BA
     const pendingLeavingTasks = processedData.filter(
-      (task) => task.columnAB && !task.leavingDate
+      (task) => task.columnAZ && task.columnAZ !== '' && (!task.columnBA || task.columnBA === '')
     );
     
     setPendingData(pendingLeavingTasks);
@@ -177,15 +185,17 @@ const fetchJoiningData = async () => {
     return matchesSearch;
   });
 
-  const handleLeavingClick = (item) => {
-    setSelectedItem(item);
-    setFormData({
-      dateOfLeaving: '',
-      mobileNumber: item.mobileNo || '',
-      reasonOfLeaving: ''
-    });
-    setShowModal(true);
-  };
+const handleLeavingClick = (item) => {
+  setSelectedItem(item);
+  setFormData({
+    dateOfLeaving: '',
+    mobileNumber: item.mobileNo || '',
+    reasonOfLeaving: '',
+    typeOfLeave: '',
+    lastWorkingDate: ''
+  });
+  setShowModal(true);
+};
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -236,7 +246,7 @@ const formatDOB = (dateString) => {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
-  if (!formData.dateOfLeaving || !formData.reasonOfLeaving) {
+  if (!formData.dateOfLeaving || !formData.reasonOfLeaving || !formData.typeOfLeave || !formData.lastWorkingDate) {
     toast.error('Please fill all required fields');
     return;
   }
@@ -251,55 +261,100 @@ const handleSubmit = async (e) => {
     const leavingDate = new Date(formData.dateOfLeaving);
     const formattedLeavingDate = `${leavingDate.getDate().toString().padStart(2, '0')}/${(leavingDate.getMonth() + 1).toString().padStart(2, '0')}/${leavingDate.getFullYear()}`;
 
-    const rowData = [
-      formattedTimestamp,
-      selectedItem.employeeNo,
-      selectedItem.candidateName,
-      formattedLeavingDate, // This will be stored in LEAVING sheet
-      formData.mobileNumber,
-      formData.reasonOfLeaving,
-      selectedItem.firmName,
-      selectedItem.fatherName,
-      formatDOB(selectedItem.dateOfJoining),
-      selectedItem.workingPlace,
-      selectedItem.designation,
-      selectedItem.department,
-    ];
+    // Format last working date as "20/09/2025" (dd/mm/yyyy)
+    const lastWorkingDate = new Date(formData.lastWorkingDate);
+    const formattedLastWorkingDate = `${lastWorkingDate.getDate().toString().padStart(2, '0')}/${(lastWorkingDate.getMonth() + 1).toString().padStart(2, '0')}/${lastWorkingDate.getFullYear()}`;
 
-    // First, update the JOINING sheet with leaving date (Column Y, index 24)
-    const updateJoiningParams = new URLSearchParams({
+    // 1. Update Column BA with actual date (Column BA is index 52)
+    const updateActualParams = new URLSearchParams({
       sheetName: 'JOINING',
       action: 'updateCell',
       rowIndex: selectedItem.rowIndex.toString(),
-      columnIndex: '25', // Column Y is index 25 (0-based index + 1 for Sheets)
-      value: formattedLeavingDate, // This will be stored in JOINING sheet
+      columnIndex: '53', // Column BA
+      value: formattedTimestamp,
     });
 
-    const updateJoiningResponse = await fetch('https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec', {
+    const updateActualResponse = await fetch('https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec', {
       method: 'POST',
-      body: updateJoiningParams,
+      body: updateActualParams,
     });
 
-    const updateText = await updateJoiningResponse.text();
-    let updateResult;
+    const updateActualText = await updateActualResponse.text();
+    let updateActualResult;
     
     try {
-      updateResult = JSON.parse(updateText);
+      updateActualResult = JSON.parse(updateActualText);
     } catch (parseError) {
-      console.error('Failed to parse JOINING update response:', updateText);
-      throw new Error(`Server returned invalid response: ${updateText.substring(0, 100)}...`);
+      console.error('Failed to parse BA update response:', updateActualText);
+      throw new Error(`Server returned invalid response: ${updateActualText.substring(0, 100)}...`);
     }
     
-    if (!updateResult.success) {
-      throw new Error(updateResult.error || 'Failed to update JOINING sheet');
+    if (!updateActualResult.success) {
+      throw new Error(updateActualResult.error || 'Failed to update Column BA in JOINING sheet');
     }
 
-    // Update reason in JOINING sheet (Column Z, index 25)
+    // 2. Update Column BC with Type of Leave (Column BC is index 54)
+    const updateTypeParams = new URLSearchParams({
+      sheetName: 'JOINING',
+      action: 'updateCell',
+      rowIndex: selectedItem.rowIndex.toString(),
+      columnIndex: '55', // Column BC
+      value: formData.typeOfLeave,
+    });
+
+    const updateTypeResponse = await fetch('https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec', {
+      method: 'POST',
+      body: updateTypeParams,
+    });
+
+    const updateTypeText = await updateTypeResponse.text();
+    let updateTypeResult;
+    
+    try {
+      updateTypeResult = JSON.parse(updateTypeText);
+    } catch (parseError) {
+      console.error('Failed to parse BC update response:', updateTypeText);
+      throw new Error(`Server returned invalid response: ${updateTypeText.substring(0, 100)}...`);
+    }
+    
+    if (!updateTypeResult.success) {
+      throw new Error(updateTypeResult.error || 'Failed to update Type of Leave in JOINING sheet');
+    }
+
+    // 3. Update Column BD with Date (Column BD is index 55)
+    const updateDateParams = new URLSearchParams({
+      sheetName: 'JOINING',
+      action: 'updateCell',
+      rowIndex: selectedItem.rowIndex.toString(),
+      columnIndex: '56', // Column BD
+      value: formattedLeavingDate,
+    });
+
+    const updateDateResponse = await fetch('https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec', {
+      method: 'POST',
+      body: updateDateParams,
+    });
+
+    const updateDateText = await updateDateResponse.text();
+    let updateDateResult;
+    
+    try {
+      updateDateResult = JSON.parse(updateDateText);
+    } catch (parseError) {
+      console.error('Failed to parse BD update response:', updateDateText);
+      throw new Error(`Server returned invalid response: ${updateDateText.substring(0, 100)}...`);
+    }
+    
+    if (!updateDateResult.success) {
+      throw new Error(updateDateResult.error || 'Failed to update Date in Column BD');
+    }
+
+    // 4. Update Column BE with Reason (Column BE is index 56)
     const updateReasonParams = new URLSearchParams({
       sheetName: 'JOINING',
       action: 'updateCell',
       rowIndex: selectedItem.rowIndex.toString(),
-      columnIndex: '26', // Column Z is index 26 (0-based index + 1 for Sheets)
+      columnIndex: '57', // Column BE
       value: formData.reasonOfLeaving,
     });
 
@@ -314,15 +369,58 @@ const handleSubmit = async (e) => {
     try {
       updateReasonResult = JSON.parse(updateReasonText);
     } catch (parseError) {
-      console.error('Failed to parse JOINING reason update response:', updateReasonText);
+      console.error('Failed to parse BE update response:', updateReasonText);
       throw new Error(`Server returned invalid response: ${updateReasonText.substring(0, 100)}...`);
     }
     
     if (!updateReasonResult.success) {
-      throw new Error(updateReasonResult.error || 'Failed to update reason in JOINING sheet');
+      throw new Error(updateReasonResult.error || 'Failed to update Reason in Column BE');
     }
 
-    // Then, insert the leaving record
+    // 5. Update Column BF with Last Working Date (Column BF is index 57)
+    const updateLastWorkingParams = new URLSearchParams({
+      sheetName: 'JOINING',
+      action: 'updateCell',
+      rowIndex: selectedItem.rowIndex.toString(),
+      columnIndex: '58', // Column BF
+      value: formattedLastWorkingDate,
+    });
+
+    const updateLastWorkingResponse = await fetch('https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec', {
+      method: 'POST',
+      body: updateLastWorkingParams,
+    });
+
+    const updateLastWorkingText = await updateLastWorkingResponse.text();
+    let updateLastWorkingResult;
+    
+    try {
+      updateLastWorkingResult = JSON.parse(updateLastWorkingText);
+    } catch (parseError) {
+      console.error('Failed to parse BF update response:', updateLastWorkingText);
+      throw new Error(`Server returned invalid response: ${updateLastWorkingText.substring(0, 100)}...`);
+    }
+    
+    if (!updateLastWorkingResult.success) {
+      throw new Error(updateLastWorkingResult.error || 'Failed to update Last Working Date in Column BF');
+    }
+
+    // 6. Insert data into LEAVING sheet
+    const rowData = [
+      formattedTimestamp,
+      selectedItem.employeeNo,
+      selectedItem.candidateName,
+      formattedLeavingDate,
+      formData.mobileNumber,
+      formData.reasonOfLeaving,
+      selectedItem.firmName,
+      selectedItem.fatherName,
+      formatDOB(selectedItem.dateOfJoining),
+      selectedItem.workingPlace,
+      selectedItem.designation,
+      selectedItem.department,
+    ];
+
     const insertParams = new URLSearchParams({
       sheetName: 'LEAVING',
       action: 'insert',
@@ -348,6 +446,9 @@ const handleSubmit = async (e) => {
       setFormData({
         dateOfLeaving: '',
         reasonOfLeaving: '',
+        typeOfLeave: '',
+        mobileNumber: '',
+        lastWorkingDate: ''
       });
       setShowModal(false);
       toast.success('Leaving request added successfully!');
@@ -426,7 +527,7 @@ const handleSubmit = async (e) => {
                 <thead className="bg-gray-100 ">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKA-Joining ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serial Number</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Father Name</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Of Joining</th>
@@ -491,7 +592,7 @@ const handleSubmit = async (e) => {
               <table className="min-w-full divide-y divide-white  ">
                 <thead className="bg-gray-100 ">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKA-Joining ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serial Number</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Of Joining</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Of Leaving</th>
@@ -550,101 +651,169 @@ const handleSubmit = async (e) => {
       </div>
 
       {/* Modal */}
-      {showModal && selectedItem && (
-        <div className=" fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4">
-          <div className=" bg-white rounded-lg shadow-lg w-full max-w-md">
-            <div className="flex justify-between items-center p-6 border-b border-gray-300  ">
-              <h3 className="text-lg font-medium text-gray-700">Leaving Form</h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-700  ">
-                <X size={20} />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">SKA-Joining ID</label>
-                <input
-                  type="text"
-                  value={selectedItem.employeeNo}
-                  disabled
-                  className="w-full border border-gray-500   rounded-md px-3 py-2 bg-white   text-gray-700"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name (नाम) </label>
-                <input
-                  type="text"
-                  value={selectedItem.candidateName}
-                  disabled
-                  className="w-full border border-gray-500   rounded-md px-3 py-2 bg-white   text-gray-700"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-500 mb-1">Date Of Leaving (छोड़ने का दिनांक) *</label>
-                <input
-                  type="date"
-                  name="dateOfLeaving"
-                  value={formData.dateOfLeaving}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-500   rounded-md px-3 py-2 focus:outline-none focus:ring-2  focus:ring-blue-500 bg-white   text-gray-700"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-500 mb-1">Mobile Number (मोबाइल नंबर) </label>
-                <input
-                  type="tel"
-                  name="mobileNumber"
-                  value={formData.mobileNumber}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-500   rounded-md px-3 py-2 focus:outline-none focus:ring-2  focus:ring-blue-500 bg-white   text-gray-700    "
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Reason Of Leaving (छोड़ने का कारण) *</label>
-                <textarea
-                  name="reasonOfLeaving"
-                  value={formData.reasonOfLeaving}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full border border-gray-500   rounded-md px-3 py-2 focus:outline-none focus:ring-2  focus:ring-blue-500 bg-white   text-gray-700    "
-                  required
-                />
-              </div>
-              <div className="flex justify-end space-x-2 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-300   rounded-md text-gray-700 hover:bg-white  "
-                >
-                  Cancel
-                </button>
-               <button
-    type="submit"
-    className={`px-4 py-2 text-white bg-indigo-700 rounded-md hover:bg-indigo-800 min-h-[42px] flex items-center justify-center ${
-      submitting ? 'opacity-90 cursor-not-allowed' : ''
-    }`}
-    disabled={submitting}
-  >
-    {submitting ? (
-      <div className="flex items-center">
-        <svg 
-          className="animate-spin h-4 w-4 text-white mr-2" 
-          xmlns="http://www.w3.org/2000/svg" 
-          fill="none" 
-          viewBox="0 0 24 24"
-        >
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span>Submitting...</span>
+   {showModal && selectedItem && (
+  <div className="fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="flex justify-between items-center p-6 border-b border-gray-300 sticky top-0 bg-white z-10">
+        <h3 className="text-lg font-medium text-gray-700">Leaving Form</h3>
+        <button onClick={() => setShowModal(false)} className="text-gray-700">
+          <X size={20} />
+        </button>
       </div>
-    ) : 'Submit'}
-  </button>
-              </div>
-            </form>
-          </div>
+     <form onSubmit={handleSubmit} className="p-6 space-y-4">
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Serial Number</label>
+    <input
+      type="text"
+      value={selectedItem.employeeNo}
+      disabled
+      className="w-full border border-gray-500 rounded-md px-3 py-2 bg-white text-gray-700"
+    />
+  </div>
+  
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Employee Code</label>
+    <input
+      type="text"
+      value={selectedItem.employeeCode || ''}
+      disabled
+      className="w-full border border-gray-500 rounded-md px-3 py-2 bg-white text-gray-700"
+    />
+  </div>
+  
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+    <input
+      type="text"
+      value={selectedItem.candidateName}
+      disabled
+      className="w-full border border-gray-500 rounded-md px-3 py-2 bg-white text-gray-700"
+    />
+  </div>
+  
+  <div>
+    <label className="block text-sm font-medium text-gray-500 mb-1">Type of Leave *</label>
+    <select
+      name="typeOfLeave"
+      value={formData.typeOfLeave}
+      onChange={handleInputChange}
+      className="w-full border border-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
+      required
+    >
+      <option value="">Select Type of Leave</option>
+      <option value="Resignation">Resignation</option>
+      <option value="Termination">Termination</option>
+    </select>
+  </div>
+  
+  {formData.typeOfLeave === 'Resignation' && (
+    <>
+      <div>
+        <label className="block text-sm font-medium text-gray-500 mb-1">Date Of Leaving *</label>
+        <input
+          type="date"
+          name="dateOfLeaving"
+          value={formData.dateOfLeaving}
+          onChange={handleInputChange}
+          className="w-full border border-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
+          required
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Reason Of Leaving *</label>
+        <textarea
+          name="reasonOfLeaving"
+          value={formData.reasonOfLeaving}
+          onChange={handleInputChange}
+          rows={3}
+          className="w-full border border-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700 resize-none"
+          required
+        />
+      </div>
+    </>
+  )}
+  
+  {formData.typeOfLeave === 'Termination' && (
+    <>
+      <div>
+        <label className="block text-sm font-medium text-gray-500 mb-1">Date Of Termination *</label>
+        <input
+          type="date"
+          name="dateOfLeaving"
+          value={formData.dateOfLeaving}
+          onChange={handleInputChange}
+          className="w-full border border-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
+          required
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Reason Of Termination *</label>
+        <textarea
+          name="reasonOfLeaving"
+          value={formData.reasonOfLeaving}
+          onChange={handleInputChange}
+          rows={3}
+          className="w-full border border-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700 resize-none"
+          required
+        />
+      </div>
+    </>
+  )}
+  
+  {formData.typeOfLeave && (
+    <div>
+      <label className="block text-sm font-medium text-gray-500 mb-1">Last Working Date *</label>
+      <input
+        type="date"
+        name="lastWorkingDate"
+        value={formData.lastWorkingDate}
+        onChange={handleInputChange}
+        className="w-full border border-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
+        required
+      />
+    </div>
+  )}
+  
+  {/* Submit buttons remain same */}
+  <div className="flex justify-end space-x-2 pt-4 sticky bottom-0 bg-white border-t border-gray-100 -mx-6 px-6 py-4 mt-6">
+    <button
+      type="button"
+      onClick={() => setShowModal(false)}
+      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      className={`px-4 py-2 text-white bg-indigo-700 rounded-md hover:bg-indigo-800 min-h-[42px] flex items-center justify-center ${
+        submitting ? 'opacity-90 cursor-not-allowed' : ''
+      }`}
+      disabled={submitting}
+    >
+      {submitting ? (
+        <div className="flex items-center">
+          <svg 
+            className="animate-spin h-4 w-4 text-white mr-2" 
+            xmlns="http://www.w3.org/2000/svg" 
+            fill="none" 
+            viewBox="0 0 24 24"
+          >
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Submitting...</span>
         </div>
-      )}
+      ) : 'Submit'}
+    </button>
+  </div>
+</form>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 };
