@@ -768,7 +768,7 @@ const calculateLeaveCounts = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Employee Code</label>
                 <input
                   type="text"
                   name="employeeId"

@@ -410,7 +410,7 @@ const [afterLeavingOpen, setAfterLeavingOpen] = useState(false);
   },
   { path: '/employee', icon: Users, label: 'Employee' },
   { path: '/leave-management', icon: BookPlus, label: 'Leave Management' },
-  { path: '/gate-pass', icon: DoorOpen, label: 'Gate Pass' },
+  // { path: '/gate-pass', icon: DoorOpen, label: 'Gate Pass' },
   {
     type: 'dropdown',
     icon: Book,
@@ -431,7 +431,7 @@ const [afterLeavingOpen, setAfterLeavingOpen] = useState(false);
     { path: '/my-profile', icon: ProfileIcon, label: 'My Profile' },
     { path: '/my-attendance', icon: Clock, label: 'My Attendance' },
     { path: '/leave-request', icon: LeaveIcon, label: 'Leave Request' },
-    { path: '/gate-pass-request', icon: DoorOpen, label: 'Gate Pass Request' },
+    // { path: '/gate-pass-request', icon: DoorOpen, label: 'Gate Pass Request' },
     { path: '/my-salary', icon: DollarSign, label: 'My Salary' },
     { path: '/company-calendar', icon: Calendar, label: 'Company Calendar' },
   ];

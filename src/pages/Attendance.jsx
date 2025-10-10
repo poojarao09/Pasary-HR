@@ -59,7 +59,8 @@ const getIndex = (headerName) => {
       const processedData = dataRows.map((row) => ({
         year: row[getIndex('Year')] || '',
         month: row[getIndex('Month')] || '',
-        empId: row[getIndex('Employee ID')] || '',
+       empId: row[2] || '',
+
         name: row[getIndex('Name')] || '',
         designation: row[getIndex('Designation')] || '',
         company: row[getIndex('Company Name')] || '',
