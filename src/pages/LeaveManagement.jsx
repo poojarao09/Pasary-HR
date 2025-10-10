@@ -479,7 +479,7 @@ const handleLeaveAction = async (action) => {
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Select
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee ID</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serial Number</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
@@ -602,7 +602,7 @@ const handleLeaveAction = async (action) => {
     <table className="min-w-full divide-y divide-white">
       <thead className="bg-gray-100">
         <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee ID</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serial Number</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
@@ -645,7 +645,7 @@ const handleLeaveAction = async (action) => {
     <table className="min-w-full divide-y divide-white">
       <thead className="bg-gray-100">
         <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee ID</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serial Number</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
@@ -715,7 +715,7 @@ const handleLeaveAction = async (action) => {
           <div className="relative w-full">
             <input
               type="text"
-              placeholder="Search by name or employee ID..."
+              placeholder="Search by name or Serial Number..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -801,7 +801,7 @@ const handleLeaveAction = async (action) => {
       </div>
       <form onSubmit={handleSubmit} className="p-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Employee Name (कर्मचारी का नाम) *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Employee Name  *</label>
           <select
             name="employeeName"
             value={formData.employeeName}
@@ -817,7 +817,7 @@ const handleLeaveAction = async (action) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID (कर्मचारी आईडी) </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Serial Number  </label>
           <input
             type="text"
             name="employeeId"
@@ -828,7 +828,7 @@ const handleLeaveAction = async (action) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Designation (पद का नाम) </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Designation  </label>
           <input
             type="text"
             name="designation"
@@ -839,7 +839,7 @@ const handleLeaveAction = async (action) => {
         </div>
 
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">HOD Name (एचओडी का नाम) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">HOD Name  *</label>
             <select
               name="hodName"
               value={formData.hodName}
@@ -855,7 +855,7 @@ const handleLeaveAction = async (action) => {
           </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Leave Type (छुट्टी के प्रकार) *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Leave Type  *</label>
           <select
             name="leaveType"
             value={formData.leaveType}
@@ -872,7 +872,7 @@ const handleLeaveAction = async (action) => {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">From Date (की तिथि से) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">From Date  *</label>
             <input
               type="date"
               name="fromDate"
@@ -883,7 +883,7 @@ const handleLeaveAction = async (action) => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">To Date (तारीख तक) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">To Date  *</label>
             <input
               type="date"
               name="toDate"
@@ -898,13 +898,13 @@ const handleLeaveAction = async (action) => {
         {formData.fromDate && formData.toDate && (
           <div className="bg-blue-50 p-3 rounded-lg">
             <p className="text-sm text-blue-800">
-              Total Days (कुल दिन) : <span className="font-semibold">{calculateDays(formData.fromDate, formData.toDate)}</span>
+              Total Days  : <span className="font-semibold">{calculateDays(formData.fromDate, formData.toDate)}</span>
             </p>
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Reason (कारण) *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Reason  *</label>
           <textarea
             name="reason"
             value={formData.reason}

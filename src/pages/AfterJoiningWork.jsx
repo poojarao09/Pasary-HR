@@ -154,7 +154,7 @@ const AfterJoiningWork = () => {
     mobileName: row[42] || "",          // AJ
     pfEsic: row[36] || "",              // AL
     manualImageUrl: row[39] || "",              // AM
-    idProof: row[38] || "",             // AN
+    idProofCopy: row[37] || "",             // AN
     joiningLetter: row[41] || "",       // AO
     mobileImage: row[43] || "",         // AR
     laptopImage: row[41] || "",         // AS
@@ -229,12 +229,12 @@ const historyTasks = processedData.filter(
           emailPassword: matchingRow[4] || "",
           laptop: matchingRow[5] || "",
           mobile: matchingRow[6] || "",
-          manualImageUrl: matchingRow[9] || "",
+          manualImageUrl: matchingRow[39] || "",
           salaryConfirmation: matchingRow[11] || "", // Column L
           reportingOfficer: matchingRow[12] || "", // Column M
           pf: matchingRow[13] || "", // Column N
           baseAddress: matchingRow[14] || "", // Column O
-          idProofCopyUrl: matchingRow[15] || "", // Column P
+          idProofCopyUrl: matchingRow[37] || "", // Column P
           joiningLetterUrl: matchingRow[16] || "" // Column Q
         };
       }
@@ -775,9 +775,9 @@ const historyTasks = processedData.filter(
       { col: 35, val: selectedItem.ifscCode || "" },                // AI (Column 35) - IFSC Code
       { col: 36, val: selectedItem.designation || "" },             // AJ (Column 36) - Designation
       { col: 37, val: formData.pf },                                // AK (Column 37) - PF / ESIC
-      { col: 38, val: idProofCopyUrl },                             // AL (Column 38) - ID Proof Copy
+      { col: 38, val: formData.idProofCopy },                             // AL (Column 38) - ID Proof Copy
       { col: 39, val: joiningLetterUrl },                           // AM (Column 39) - Joining Letter Upload
-      { col: 40, val: manualImageUrl },                             // AN (Column 40) - Manual/Document
+      { col: 40, val: formData.manualImage },                             // AN (Column 40) - Manual/Document
       { col: 41, val: formData.laptop },                            // AO (Column 41) - Assign Assets/Laptop Details
       { col: 42, val: laptopImageUrl },                             // AP (Column 42) - Laptop Image
       { col: 43, val: formData.mobile },                            // AQ (Column 43) - Mobile Name
@@ -1087,7 +1087,7 @@ const historyTasks = processedData.filter(
                 {item.joiningLetter && <a href={item.joiningLetter} target="_blank" rel="noopener noreferrer">View</a>}
               </td>
               <td className="px-4 py-2 text-sm text-blue-600 underline">
-                {item.manualDocument && <a href={item.manualDocument} target="_blank" rel="noopener noreferrer">View</a>}
+                {item.manualImageUrl && <a href={item.manualImageUrl} target="_blank" rel="noopener noreferrer">View</a>}
               </td>
               <td className="px-4 py-2 text-sm text-gray-700">{item.laptopDetails}</td>
               
@@ -1095,7 +1095,7 @@ const historyTasks = processedData.filter(
               <td className="px-4 py-2">
                 {item.laptopImage ? (
                   <a href={item.laptopImage} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                    View Image
+                    View 
                   </a>
                 ) : (
                   <span className="text-gray-400">No Image</span>
@@ -1108,7 +1108,7 @@ const historyTasks = processedData.filter(
               <td className="px-4 py-2">
                 {item.mobileImage ? (
                   <a href={item.mobileImage} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                    View Image
+                    View 
                   </a>
                 ) : (
                   <span className="text-gray-400">No Image</span>
@@ -1121,7 +1121,7 @@ const historyTasks = processedData.filter(
               <td className="px-4 py-2">
                 {item.item1Image ? (
                   <a href={item.item1Image} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                    View Image
+                    View 
                   </a>
                 ) : (
                   <span className="text-gray-400">No Image</span>
@@ -1134,7 +1134,7 @@ const historyTasks = processedData.filter(
               <td className="px-4 py-2">
                 {item.item2Image ? (
                   <a href={item.item2Image} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                    View Image
+                    View 
                   </a>
                 ) : (
                   <span className="text-gray-400">No Image</span>
@@ -1147,7 +1147,7 @@ const historyTasks = processedData.filter(
               <td className="px-4 py-2">
                 {item.item3Image ? (
                   <a href={item.item3Image} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                    View Image
+                    View 
                   </a>
                 ) : (
                   <span className="text-gray-400">No Image</span>

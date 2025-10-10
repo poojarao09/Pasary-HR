@@ -27,159 +27,153 @@ const Employee = () => {
     return `${day}/${month}/${year}`;
   };
 
-  const fetchJoiningData = async () => {
-    setLoading(true);
-    setTableLoading(true);
-    setError(null);
+const fetchJoiningData = async () => {
+  setLoading(true);
+  setTableLoading(true);
+  setError(null);
 
-    try {
-      const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=JOINING&action=fetch"
-      );
+  try {
+    const response = await fetch(
+      "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=JOINING&action=fetch"
+    );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log("Raw JOINING API response:", result);
-
-      if (!result.success) {
-        throw new Error(
-          result.error || "Failed to fetch data from JOINING sheet"
-        );
-      }
-
-      // Handle both array formats (direct data or result.data)
-      const rawData = result.data || result;
-
-      if (!Array.isArray(rawData)) {
-        throw new Error("Expected array data not received");
-      }
-
-      // Get headers from row 6 (index 5 in 0-based array)
-      const headers = rawData[5];
-
-      // Process data starting from row 7 (index 6)
-      const dataRows = rawData.length > 6 ? rawData.slice(6) : [];
-
-      const getIndex = (headerName) => {
-        const index = headers.findIndex(
-          (h) =>
-            h && h.toString().trim().toLowerCase() === headerName.toLowerCase()
-        );
-        if (index === -1) {
-          console.warn(`Column "${headerName}" not found in sheet`);
-        }
-        return index;
-      };
-
-      const processedData = dataRows.map((row) => ({
-        employeeId: row[1] || "", // Column B (index 1)
-        candidateName: row[2] || "", // Column C (index 2)
-        fatherName: row[3] || "", // Column D (index 3)
-        dateOfJoining: row[4] || "", // Column E (index 4)
-        designation: row[5] || "", // Column F (index 5)
-        aadharPhoto: row[6] || "", // Column G (index 6)
-        candidatePhoto: row[7] || "", // Column H (index 7)
-        address: row[8] || "", // Column I (index 8)
-        dateOfBirth: row[9] || "", // Column J (index 9)
-        gender: row[10] || "", // Column K (index 10)
-        mobileNo: row[11] || "", // Column L (index 11)
-        familyNo: row[12] || "", // Column M (index 12)
-        relationshipWithFamily: row[13] || "", // Column N (index 13)
-        accountNo: row[14] || "", // Column O (index 14)
-        ifsc: row[15] || "", // Column P (index 15)
-        branch: row[16] || "", // Column Q (index 16)
-        passbook: row[17] || "", // Column R (index 17)
-        emailId: row[18] || "", // Column S (index 18)
-        department: row[20] || "", // Column U (index 20)
-        equipment: row[21] || "", // Column V (index 21)
-        aadharNo: row[22] || "", // Column W (index 22) - Fixed index
-        // Keep existing filter fields
-        columnAA: row[26] || "",
-        columnY: row[24] || "",
-      }));
-
-      // Filter logic: Column AQ has value AND Column AO is null/empty
-      const activeEmployees = processedData.filter(
-        (employee) => employee.columnAA && !employee.columnY
-      );
-
-      setJoiningData(activeEmployees);
-    } catch (error) {
-      console.error("Error fetching joining data:", error);
-      setError(error.message);
-      toast.error(`Failed to load joining data: ${error.message}`);
-    } finally {
-      setLoading(false);
-      setTableLoading(false);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  };
 
-  const fetchLeavingData = async () => {
-    setLoading(true);
-    setTableLoading(true);
-    setError(null);
+    const result = await response.json();
+    console.log("Raw JOINING API response:", result);
 
-    try {
-      const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=LEAVING&action=fetch"
+    if (!result.success) {
+      throw new Error(
+        result.error || "Failed to fetch data from JOINING sheet"
       );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(
-          result.error || "Failed to fetch data from LEAVING sheet"
-        );
-      }
-
-      const rawData = result.data || result;
-
-      if (!Array.isArray(rawData)) {
-        throw new Error("Expected array data not received");
-      }
-
-      // Process data starting from row 7 (index 6) - skip headers
-      const dataRows = rawData.length > 6 ? rawData.slice(6) : [];
-
-      const processedData = dataRows.map((row) => ({
-        timestamp: row[0] || "",
-        employeeId: row[1] || "",
-        name: row[2] || "",
-        dateOfLeaving: row[3] || "",
-        mobileNo: row[4] || "",
-        reasonOfLeaving: row[5] || "",
-        firmName: row[6] || "",
-        fatherName: row[7] || "",
-        dateOfJoining: row[8] || "",
-        workingLocation: row[9] || "",
-        designation: row[10] || "",
-        salary: row[11] || "",
-        plannedDate: row[12] || "", // Column M (index 12)
-        actual: row[13] || "",
-      }));
-
-      // Filter logic: plannedDate (Column M) has value
-      const leavingEmployees = processedData.filter(
-        (employee) => employee.plannedDate
-      );
-
-      setLeavingData(leavingEmployees);
-    } catch (error) {
-      console.error("Error fetching leaving data:", error);
-      setError(error.message);
-      toast.error(`Failed to load leaving data: ${error.message}`);
-    } finally {
-      setLoading(false);
-      setTableLoading(false);
     }
-  };
+
+    const rawData = result.data || result;
+
+    if (!Array.isArray(rawData)) {
+      throw new Error("Expected array data not received");
+    }
+
+    const headers = rawData[5];
+    const dataRows = rawData.length > 6 ? rawData.slice(6) : [];
+
+    const processedData = dataRows.map((row) => ({
+      serialNumber: row[1] || "",
+      employeeCode: row[26] || "",
+      candidateName: row[2] || "",
+      fatherName: row[3] || "",
+      dateOfJoining: row[4] || "",
+      designation: row[5] || "",
+      aadharPhoto: row[6] || "",
+      candidatePhoto: row[7] || "",
+      address: row[8] || "",
+      dateOfBirth: row[9] || "",
+      gender: row[10] || "",
+      mobileNo: row[11] || "",
+      familyNo: row[12] || "",
+      relationshipWithFamily: row[13] || "",
+      accountNo: row[14] || "",
+      ifsc: row[15] || "",
+      branch: row[16] || "",
+      passbook: row[17] || "",
+      emailId: row[18] || "",
+      department: row[20] || "",
+      aadharNo: row[21] || "",
+      status: row[82] || "", // Column CE (index 82)
+      columnY: row[24] || "",
+    }));
+
+    // Filter logic: 
+    // 1. Show in joining tab if status is NOT "Leaved"
+    // 2. Filter out blank rows (where candidateName is empty)
+    const activeEmployees = processedData.filter((employee) => {
+      const statusFilter = !employee.status || employee.status.toLowerCase() !== "leaved";
+      const notBlankRow = employee.candidateName && employee.candidateName.trim() !== "";
+      
+      return statusFilter && notBlankRow;
+    });
+
+    setJoiningData(activeEmployees);
+  } catch (error) {
+    console.error("Error fetching joining data:", error);
+    setError(error.message);
+    toast.error(`Failed to load joining data: ${error.message}`);
+  } finally {
+    setLoading(false);
+    setTableLoading(false);
+  }
+};
+
+
+
+ const fetchLeavingData = async () => {
+  setLoading(true);
+  setTableLoading(true);
+  setError(null);
+
+  try {
+    const response = await fetch(
+      "https://script.google.com/macros/s/AKfycbyPX2PreyvGFcx8V5Jv7R2TwZgMOiEzCKSKntbTzy1ElMSvmgiWCJ1O_CHG6DStW48hlQ/exec?sheet=JOINING&action=fetch"
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(
+        result.error || "Failed to fetch data from LEAVING sheet"
+      );
+    }
+
+    const rawData = result.data || result;
+
+    if (!Array.isArray(rawData)) {
+      throw new Error("Expected array data not received");
+    }
+
+    const dataRows = rawData.length > 6 ? rawData.slice(6) : [];
+
+    const processedData = dataRows.map((row) => ({
+      timestamp: row[0] || "",
+      serialNumber: row[1] || "",
+      employeeCode: row[26] || "",
+      name: row[2] || "",
+      dateOfLeaving: row[55] || "",
+      mobileNo: row[11] || "",
+      reasonOfLeaving: row[56] || "",
+      firmName: row[6] || "",
+      fatherName: row[3] || "",
+      dateOfJoining: row[4] || "",
+      workingLocation: row[9] || "",
+      designation: row[5] || "",
+      salary: row[11] || "",
+      plannedDate: row[12] || "",
+      actual: row[13] || "",
+      status: row[82] || "", // Column CE (index 82)
+      department: row[20] || "",
+    }));
+
+    // Filter logic: Show in leaving tab if status is "Leaved"
+    const leavingEmployees = processedData.filter(
+      (employee) => employee.status && employee.status.toLowerCase() === "leaved"
+    );
+
+    setLeavingData(leavingEmployees);
+  } catch (error) {
+    console.error("Error fetching leaving data:", error);
+    setError(error.message);
+    toast.error(`Failed to load leaving data: ${error.message}`);
+  } finally {
+    setLoading(false);
+    setTableLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchJoiningData();
@@ -189,7 +183,8 @@ const Employee = () => {
   const filteredJoiningData = joiningData.filter((item) => {
     const matchesSearch =
       item.candidateName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.serialNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.employeeCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.designation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.fatherName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.department?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -201,7 +196,8 @@ const Employee = () => {
   const filteredLeavingData = leavingData.filter((item) => {
     const matchesSearch =
       item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.serialNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.employeeCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.designation?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
@@ -218,7 +214,7 @@ const Employee = () => {
           <div className="relative w-full">
             <input
               type="text"
-              placeholder="Search by name, employee ID, or designation..."
+              placeholder="Search by name, Serial Number, or designation..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300   rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 bg-white  text-gray-500 "
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -273,8 +269,9 @@ const Employee = () => {
                     {/* Made header sticky */}
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Employee ID
+                        Serial Number
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empolyee Code</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Name
                       </th>
@@ -329,9 +326,7 @@ const Employee = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Department
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Equipment
-                      </th>
+                     
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Aadhar No
                       </th>
@@ -368,7 +363,10 @@ const Employee = () => {
                           className="hover:bg-white hover:bg-opacity-5"
                         >
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.employeeId}
+                            {item.serialNumber}
+                          </td>
+                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {item.employeeCode}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {item.candidateName}
@@ -459,9 +457,7 @@ const Employee = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {item.department}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.equipment || "-"}
-                          </td>
+                         
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {item.aadharNo || "-"}
                           </td>
@@ -492,8 +488,9 @@ const Employee = () => {
                     {/* Made header sticky */}
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Employee ID
+                        Serial Number
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empolyee Code</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Name
                       </th>
@@ -549,7 +546,10 @@ const Employee = () => {
                       filteredLeavingData.map((item, index) => (
                         <tr key={index} className="hover:bg-white ">
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.employeeId}
+                            {item.serialNumber}
+                          </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {item.employeeCode}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {item.name}
@@ -575,7 +575,7 @@ const Employee = () => {
                             {item.designation}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.salary}
+                            {item.department}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {item.reasonOfLeaving}
