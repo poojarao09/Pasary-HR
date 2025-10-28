@@ -764,8 +764,8 @@ const historyTasks = processedData.filter(
     // All updates from Column AA (27) to AX (50) - Complete row update
     const updates = [
       { col: 25, val: actualDate },                                 // Y (Column 26) - Actual Date (यहाँ actual fill हो रहा है)
-      { col: 26, val: formData.employeeCode },                      // AA (Column 27) - Employee Code
-      { col: 27, val: salaryValue },                                // AB (Column 28) - Salary Confirmation
+      { col: 27, val: formData.employeeCode },                      // AA (Column 27) - Employee Code
+      { col: 28, val: salaryValue },                                // AB (Column 28) - Salary Confirmation
       { col: 29, val: formData.reportingOfficer },                  // AC (Column 29) - Reporting Officer
       { col: 30, val: formData.baseAddress },                       // AD (Column 30) - Base Address
       { col: 31, val: formData.biometricAccess ? formData.punchCode : "" }, // AE (Column 31) - Biometric Access/Punch Code
